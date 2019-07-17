@@ -106,7 +106,7 @@
 </div>
 
 <!--IMPORTANT: This import contains all the functions you need to read in your input data and send back worker outputs.-->  
-{% include "amtbase.html" %}
+{% include "easyturk.html" %}
 
   <script>
     // Define some default input.
@@ -127,11 +127,11 @@
     function main() {
       // If this is a HIT on AMT, then replace the default input with the real
       // input.
-      input = amtbase.getInput(DEFAULT_INPUT);
+      input = easyturk.getInput(DEFAULT_INPUT);
       console.log(input);
 
       // Enable the task.
-      if (!amtbase.isPreview()){
+      if (!easyturk.isPreview()){
         enableTask();
       }
 
@@ -198,7 +198,7 @@
     // Enable the UI.
     function enableTask() {
       enabled = true;
-      amtbase.setupSubmit();
+      easyturk.setupSubmit();
 
       // Enable components
       $('#next-btn').click(function() {
@@ -230,11 +230,11 @@
         for (var i = 0; i < output.length; i++) {
           output[i]['caption'] = captions[i];
         }
-        if (amtbase.isPreview()) {
+        if (easyturk.isPreview()) {
           alert("This is only a preview. Here is your output: \n" + JSON.stringify(output));
           return false;
         } else {
-          amtbase.setOutput(output);
+          easyturk.setOutput(output);
           return true;
         }
       });
