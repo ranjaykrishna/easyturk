@@ -15,12 +15,12 @@ If you are using this repository for your research, please use the following cit
 }
 ```
 
-## Why should you use EasyTurk?
+#### Why should you use EasyTurk?
 
 EasyTurk is meant for Amazon Mechanical Turk requestors who want to programmatically create, launch and retrieve Amazon Mechanical Turk microtasks. EasyTurk allows you to build custom html/javascript tasks and control your tasks using a easy python wrapper.
 
 
-## Dependencies
+#### Dependencies
 
 EasyTurk requires jinja2 to compile your custom html and javascript tasks. It requires python2.7 or higher to use the API. It also requires that you have boto3 (AMT's python interface) installed.
 
@@ -55,7 +55,7 @@ If you don’t have an AWS account already, visit [this website](https://aws.ama
 If you don’t have an MTurk Requester account already, visit [this website](https://requester.mturk.com) and create a new account.
 
 
-## Easy check to make sure everything is in place.
+#### Easy check to make sure everything is in place.
 
 Run python in your terminal. Let's see if we can access your account information.
 ```
@@ -70,14 +70,14 @@ This should print out how much balance you have left in your account. If you do 
 
 In `easyturk/templates/example.html`, there is an example image-captioning task I have already created for you. You can use that task as a reference to create your own task later. For now, let's try and see if we can render the task, launch it to AMT, then retrieve the results, and approve the assignment.
 
-### Step 1: Render the task.
+#### Step 1: Render the task.
 The following command should render the template you built. This should allow you to locally open the task in your browser and check to make sure the functionality works. Of course, when you press the submit button, nothing will happen as you are running the task locally. But once we launch this task on AMT, the submit button will pull the worker's responses to your task and send them to AMT. We will later be able to retrieve those results.
 ```
 python easyturk/render.py --template example.html --output rendered_template.html
 open rendered_template.html
 ```
 
-### Step 2: Launching the task.
+#### Step 2: Launching the task.
 The following block of code will launch the task to AMT. We start by creating a list of image urls we want to caption. The example task expects the data to be in a list of objects, where each element in the list is a dictionary containing a `url` field. Once a worker finishes the task, the task will return a similar list, except each element will contain a `caption` field. Run the following in your python interpretor:
 ```
 from easyturk import interface
@@ -97,7 +97,7 @@ The above code will launch one HIT that will pay a reward of $1 and caption the 
 `launch_example` is a custom launch script that sets the title, description, keywords, tasks_per_hit fields. When you later write your own HIT, I recommend create a custom launch function like this one. You can see the source code for the function in `easyturk/interface.py`.
 
 
-### Step 3: Tracking your task's progress.
+#### Step 3: Tracking your task's progress.
 You can query for your HIT's progress with the following:
 ```
 from easyturk import EasyTurk
@@ -111,7 +111,7 @@ The above will print out the progress made for the first HIT in the list. It sho
 ```
 
 
-### Step 4: Retrieving worker responses.
+#### Step 4: Retrieving worker responses.
 You can retrieve the work done by workers for the submitted assignments to a HIT using the following code:
 ```
 from easyturk import interface
@@ -134,7 +134,7 @@ The above code will parse out the responses made by the worker and show you some
 ]
 ```
 
-### Step 5: Approving their work.
+#### Step 5: Approving their work.
 If you are happy with the work, you can approve and pay your workers by issuing the following command:
 ```
 from easyturk import EasyTurk
@@ -147,20 +147,20 @@ for hit_id in hit_ids:
 The best way to learn to create your own tasks is to mimic the high level interface of `easyturk/templates/example.html`. The main contraint to adhere to is making sure that you are using the API provided by `easyturk/templates/easyturk.html`. Currently, EasyTurk assumes that all your tasks you design will reside in one single HTML files in the `easyturk/templates/` directory
 
 
-### Importing EasyTurk into your custom task.
+#### Importing EasyTurk into your custom task.
 Simply add the following line before your custom javascript to use the EasyTurk API:
 ```
 {% include "easyturk.html" %}
 ```
 
-### Loading the data from EasyTurk.
+#### Loading the data from EasyTurk.
 The task contains a `DEFAULT_INPUT` variable that should be set when designing your task such that it follows the input schema you expect. In our example task, that variable is a random list of image urls. It allows us to render and test the functionality of the task locally before launching it. When launched, make sure to call:
 ```
 var input = easyturk.getInput(DEFAULT_INPUT);
 ```
 This API call will update the input variable with the actual input for the given task. So, each worker will see a specific input, based on the `data` variable you set in Step 2 above.
 
-### Enabling the task.
+#### Enabling the task.
 The following API call allows workers to preview the HIT without being able to submit it. Make sure to include it so that when the HIT is accepted by a worker, the task will be enabled.
 ```
 if (!easyturk.isPreview()){
@@ -168,14 +168,14 @@ if (!easyturk.isPreview()){
 }
 ```
 
-### Setup submission and submit.
+#### Setup submission and submit.
 To make sure that the task is submittable, keep the `enableTask()` function and make sure it includes the `easyturk.setupSubmit()` call and the `easyturk.setOutput(output)` calls within.  Any python object you set the `output` variable to will be the response you get back from the worker.
 
-### Overall.
+#### Overall.
 When making your custom task, make sure to import EasyTurk's APIs. Get the input from EasyTurk, enable the hit, setup submission and then set the output that you want returned to you. It's easy!
 
 
-## More customization.
+#### More customization.
 There is a lot more you can do. Check out the fully documented code in `easyturk.py`. There are more complicated workflows you can create by using those functions. Have fun.
 
 
