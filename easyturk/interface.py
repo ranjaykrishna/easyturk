@@ -21,15 +21,16 @@ def launch_example(data, reward=1.00, tasks_per_hit=10):
         A list of hit ids that have been launched.
     """
     et = EasyTurk()
-    template = 'templates/example.html'
+    template = 'example.html'
     hit_ids = []
     i = 0
     while i < len(data):
-        hit_id = et.launch_hit(
+        hit = et.launch_hit(
             template, data[i:i+tasks_per_hit], reward=reward,
             title='Caption some pictures',
             description=('Write captions about the contents of images.'),
             keywords='image, caption, text')
+        hit_id = hit['HIT']['HITId']
         hit_ids.append(hit_id)
         i += tasks_per_hit
     return hit_ids

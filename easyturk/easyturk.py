@@ -42,7 +42,7 @@ class EasyTurk(object):
     def create_html_question(self, html, frame_height):
         head = ("<HTMLQuestion xmlns=\"http://mechanicalturk.amazonaws.com/"
                 "AWSMechanicalTurkDataSchemas/2011-11-11/HTMLQuestion.xsd\">"
-                "<HTMLContent><![CDATA[{}]]><FrameHeight>")
+                "<HTMLContent><![CDATA[{}]]></HTMLContent><FrameHeight>")
         tail = "</FrameHeight></HTMLQuestion>"
         xml = head + str(frame_height) + tail
         return xml.format(html)
@@ -62,7 +62,7 @@ class EasyTurk(object):
         """
         return self.mtc.get_account_balance()['AvailableBalance']
 
-    def launch_hit(self, template_location, input_data, reward='0',
+    def launch_hit(self, template_location, input_data, reward=0,
                    frame_height=9000, title=None, description=None,
                    keywords=None, duration=900, max_assignments=1,
                    country='US', hits_approved=10000, lifetime=604800,
@@ -102,7 +102,7 @@ class EasyTurk(object):
                                   'IntegerValues': [percent_approved],
                               }
                           ],
-                          'Reward': reward}
+                          'Reward': str(reward)}
 
         # Setup HTML Question.
         env = self.get_jinja_env()
@@ -113,13 +113,8 @@ class EasyTurk(object):
 
         hit_properties['Question'] = html_question
 
-        try:
-            boto_hit = self.mtc.create_hit(**hit_properties)
-            hit_id = boto_hit[0].HITId
-            return hit_id
-        except Exception as e:
-            print e
-        return None
+        hit = self.mtc.create_hit(**hit_properties)
+        return hit
 
     def get_results(self, hit_id, reject_on_fail=False):
         """Retrives the output of a hit if it has finished.
