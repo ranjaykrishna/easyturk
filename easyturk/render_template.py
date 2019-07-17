@@ -13,7 +13,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Compile the template.
-    et = Easyturk()
+    et = EasyTurk()
     env = et.get_jinja_env()
     template = env.get_template(args.template)
 
