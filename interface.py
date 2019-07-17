@@ -6,7 +6,7 @@ from random import shuffle
 import json
 import logging
 
-from amt import AMT
+from easyturk import EasyTurk
 
 
 def launch_example(data, reward=1.00, tasks_per_hit=10):
@@ -20,12 +20,12 @@ def launch_example(data, reward=1.00, tasks_per_hit=10):
     Returns:
         A list of hit ids that have been launched.
     """
-    amt = AMT()
+    et = EasyTurk()
     template = 'templates/example.html'
     hit_ids = []
     i = 0
     while i < len(data):
-        hit_id = amt.launch_hit(
+        hit_id = et.launch_hit(
             template, data[i:i+tasks_per_hit], reward=reward,
             title='Caption some pictures',
             description=('Write captions about the contents of images.'),
@@ -46,14 +46,14 @@ def fetch_completed_hits(hit_ids, approve=True):
         A dictionary from hit_id to the result, if that hit_id has
         been submitted.
     """
-    amt = AMT()
+    et = EasyTurk()
     output = {}
     for hit_id in hit_ids:
-        results = amt.get_results(hit_id, results_on_fail=False)
+        results = et.get_results(hit_id, results_on_fail=False)
         if len(results) > 0:
             output[hit_id] = results
             if approve:
                 for assignment in results:
                     assignment_id = assignment['assignment_id']
-                    amt.approve_assignment(assignment_id)
+                    et.approve_assignment(assignment_id)
     return output

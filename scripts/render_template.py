@@ -3,7 +3,7 @@
 
 import argparse
 
-from amt import AMT
+from easyturk import EasyTurk
 
 
 if __name__ == '__main__':
@@ -13,8 +13,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Compile the template.
-    mturk = AMT()
-    env = mturk.get_jinja_env()
+    et = Easyturk()
+    env = et.get_jinja_env()
     template = env.get_template(args.template)
 
     html = template.render({'input': ''})

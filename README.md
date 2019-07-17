@@ -29,11 +29,13 @@ EasyTurk requires jinja2 to compile your custom html and javascript tasks. It re
 
 First let's install the code.
 ```
-# Clone your repository.
+# Clone the repository.
 git clone git@github.com:ranjaykrishna/easyturk.git
 cd easyturk
 
-# Create a virtualenv. You might want to use -p python3 option if you want to use EasyTurk with python 3. 
+# Create a virtual environment.
+# You might want to use -p python3 option 
+# if you want to use EasyTurk with python 3. 
 virtualenv env
 
 # Activate your environment.
@@ -48,21 +50,19 @@ Now, let's install your AMT access keys.
 ```
 aws configure --profile mturk
 ```
-
 This will prompt you to enter your access key and secret key for your AMT account.
 If you don’t have an AWS account already, visit [this website](https://aws.amazon.com) and create an account.
 If you don’t have an MTurk Requester account already, visit [this website](https://requester.mturk.com) and create a new account.
 
 
-## Easy Check to make sure everything is in place.
+## Easy check to make sure everything is in place.
 
 Run python in your terminal. Let's see if we can access your account information.
 ```
-from amt import AMT
-amt = AMT()
-print(amt.get_account_balance())
+from easyturk import EasyTurk
+et = EasyTurk()
+print(et.get_account_balance())
 ```
-
 This should print out how much balance you have left in your account. If you do not see the amount, then there setup was not successful.
 
 
@@ -100,9 +100,9 @@ The above code will launch one HIT that will pay a reward of $1 and caption the 
 ### Step 3: Tracking your task's progress.
 You can query for your HIT's progress with the following:
 ```
-from amt import AMT
-amt = AMT()
-progress = approved_amt.show_hit_progress(hit_ids)
+from easyturk import EasyTurk
+et = EasyTurk()
+progress = et.show_hit_progress(hit_ids)
 print(progress[0])
 ```
 The above will print out the progress made for the first HIT in the list. It should print something like:
@@ -137,10 +137,10 @@ The above code will parse out the responses made by the worker and show you some
 ### Step 5: Approving their work.
 If you are happy with the work, you can approve and pay your workers by issuing the following command:
 ```
-from amt import AMT
-amt = AMT()
+from easyturk import EasyTurk
+et = EasyTurk()
 for hit_id in hit_ids:
-    amt.approve_hits(hit_id)
+    et.approve_hits(hit_id)
 ```
 
 ## Designing your own AMT task.
@@ -176,7 +176,7 @@ When making your custom task, make sure to import EasyTurk's APIs. Get the input
 
 
 ## More customization.
-There is a lot more you can do. Check out the fully documented code in `amt.py`. There are more complicated workflows you can create by using those functions. Have fun.
+There is a lot more you can do. Check out the fully documented code in `easyturk.py`. There are more complicated workflows you can create by using those functions. Have fun.
 
 
 ## Contributing to this repository.

@@ -9,12 +9,12 @@ import json
 import os
 
 
-class AMT(object):
+class EasyTurk(object):
     """Class that contains all the api calls to interface with MTurk.
     """
 
     def __init__(self, sandbox=True):
-        """Constructor for AMT.
+        """Constructor for EasyTurk.
 
         Args:
             sandbox: Whether we are launching on sandbox.
