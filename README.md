@@ -94,11 +94,50 @@ The above code will launch one HIT that will pay a reward of $1 and caption the 
 
 
 ### Step 3: Tracking your task's progress.
+You can query for your HIT's progress with the following:
+```
+from amt import AMT
+amt = AMT()
+progress = approved_amt.show_hit_progress(hit_ids)
+print(progress[0])
+```
+The above will print out the progress made for the first HIT in the list. It should print something like:
+```
+{'completed': 0, 'max_assignment': 1}
+```
 
 
 ### Step 4: Retrieving worker responses.
+You can retrieve the work done by workers for the submitted assignments to a HIT using the following code:
+```
+from interface import fetch_completed_hits
+
+# approve is set to False because right now we are only fetching the results. You can set it to True to auto-approve the assignments.
+results = fetch_completed_hits(hit_ids, approve=False)
+print(results[hit_ids[0]])
+```
+The above code will parse out the responses made by the worker and show you something like the following:
+```
+[
+    {
+       'url': 'http://visualgenome.org/static/images/collect_sentences/dogs-playing.jpg',
+       'caption': 'Two dogs playing with a stick.'
+    },
+    {
+       'url': 'http://visualgenome.org/static/images/collect_sentences/computer.png',
+       'caption': 'A cluttered room',
+    }
+]
+```
 
 ### Step 5: Approving their work.
+If you are happy with the work, you can approve and pay your workers by issuing the following command:
+```
+from amt import AMT
+amt = AMT()
+for hit_id in hit_ids:
+    amt.approve_hits(hit_id)
+```
 
 ## Designing your own AMT task.
 
