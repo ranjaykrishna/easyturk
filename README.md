@@ -140,8 +140,39 @@ for hit_id in hit_ids:
 ```
 
 ## Designing your own AMT task.
+The best way to learn to create your own tasks is to mimic the high level interface of `templates/example.html`. The main contraint to adhere to is making sure that you are using the API provided by `templates/easyturk.html`.
 
-Coming soon.
+
+### Importing EasyTurk into your custom task.
+Simply add the following line before your custom javascript to use the EasyTurk API:
+```
+{% include "easyturk.html" %}
+```
+
+### Loading the data from EasyTurk.
+The task contains a `DEFAULT_INPUT` variable that should be set when designing your task such that it follows the input schema you expect. In our example task, that variable is a random list of image urls. It allows us to render and test the functionality of the task locally before launching it. When launched, make sure to call:
+```
+var input = easyturk.getInput(DEFAULT_INPUT);
+```
+This API call will update the input variable with the actual input for the given task. So, each worker will see a specific input, based on the `data` variable you set in Step 2 above.
+
+### Enabling the task.
+The following API call allows workers to preview the HIT without being able to submit it. Make sure to include it so that when the HIT is accepted by a worker, the task will be enabled.
+```
+if (!easyturk.isPreview()){
+    enableTask();
+}
+```
+
+### Setup submission and submit.
+To make sure that the task is submittable, keep the `enableTask()` function and make sure it includes the `easyturk.setupSubmit()` call and the `easyturk.setOutput(output)` calls within.  Any python object you set the `output` variable to will be the response you get back from the worker.
+
+### Overall.
+When making your custom task, make sure to import EasyTurk's APIs. Get the input from EasyTurk, enable the hit, setup submission and then set the output that you want returned to you. It's easy!
+
+
+## More customization.
+There is a lot more you can do. Check out the fully documented code in `amt.py`. There are more complicated workflows you can create by using those functions. Have fun.
 
 
 ## Contributing to this repository.
