@@ -103,7 +103,7 @@ You can query for your HIT's progress with the following:
 from easyturk import EasyTurk
 et = EasyTurk()
 progress = et.show_hit_progress(hit_ids)
-print(progress[0])
+print(progress[hit_ids[0]])
 ```
 The above will print out the progress made for the first HIT in the list. It should print something like:
 ```
