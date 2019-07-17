@@ -186,7 +186,7 @@
     function saveCaption() {
       var c = $('#caption').val();
       var lc = c.toLowerCase();
-      var numWords = lq.split(' ').length;
+      var numWords = lc.split(' ').length;
       if (numWords < 5) {
           alert('Your caption is too short. Please try to come up with a more specific caption.');
           return false;
