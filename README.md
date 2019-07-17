@@ -64,7 +64,7 @@ This should print out how much balance you have left in your account. If you do 
 
 ## Launching an example image-captioning task on AMT.
 
-In `templates/example.html`, there is an example image-captionin task I have already created for you. You can use that task as a reference to create your own task later. For now, let's try and see if we can render the task, launch it to AMT, then retrieve the results, and approve the assignment.
+In `templates/example.html`, there is an example image-captioning task I have already created for you. You can use that task as a reference to create your own task later. For now, let's try and see if we can render the task, launch it to AMT, then retrieve the results, and approve the assignment.
 
 ### Step 1: Render the task.
 The following command should render the template you built. This should allow you to locally open the task in your browser and check to make sure the functionality works. Of course, when you press the submit button, nothing will happen as you are running the task locally. But once we launch this task on AMT, the submit button will pull the worker's responses to your task and send them to AMT. We will later be able to retrieve those results.
@@ -73,11 +73,27 @@ python scripts/render.py --template templates/example.html --output rendered_tem
 open rendered_template.html
 ```
 
-### Step 2: Launch the task.
-The following block of code will 
+### Step 2: Launching the task.
+The following block of code will launch the task to AMT. We start by creating a list of image urls we want to caption. The example task expects the data to be in a list of objects, where each element in the list is a dictionary containing a `url` field. Once a worker finishes the task, the task will return a similar list, except each element will contain a `caption` field. Run the following in your python interpretor:
+```
+from interface import launch_example
+data = [
+           {
+               'url': 'http://visualgenome.org/static/images/collect_sentences/dogs-playing.jpg',
+           },
+           {
+               'url': 'http://visualgenome.org/static/images/collect_sentences/computer.png',
+           }
+       ]
+hit_ids = launch_example(data, reward=1, tasks_per_hit=10)
+print(hit_ids)
+```
+The above code will launch one HIT that will pay a reward of $1 and caption the two images in the list. Once the HIT is launched, it will return and print out the HITId. This HITId will be used to later retrieve and approve worker's responses. So make sure to NOT lose it. It's good practice to save your HITIds in a database or logfile. But if you do lose it, you can always get it back by queries for all the active HITs you have on AMT.
+
+`launch_example` is a custom launch script that sets the title, description, keywords, tasks_per_hit fields. When you later write your own HIT, I recommend create a custom launch function like this one. You can see the source code for the function in `interface.py`.
 
 
-### Step 3: Launching your task.
+### Step 3: Tracking your task's progress.
 
 
 ### Step 4: Retrieving worker responses.
