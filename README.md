@@ -60,7 +60,7 @@ If you don’t have an MTurk Requester account already, visit [this website](htt
 Run python in your terminal. Let's see if we can access your account information.
 ```
 from easyturk import EasyTurk
-et = EasyTurk()
+et = EasyTurk(sandbox=False)
 print(et.get_account_balance())
 ```
 This should print out how much balance you have left in your account. If you do not see the amount, then there setup was not successful.
@@ -101,7 +101,7 @@ The above code will launch one HIT that will pay a reward of $1 and caption the 
 You can query for your HIT's progress with the following:
 ```
 from easyturk import EasyTurk
-et = EasyTurk()
+et = EasyTurk(sandbox=False)
 progress = et.show_hit_progress(hit_ids)
 print(progress[hit_ids[0]])
 ```
@@ -138,7 +138,7 @@ The above code will parse out the responses made by the worker and show you some
 If you are happy with the work, you can approve and pay your workers by issuing the following command:
 ```
 from easyturk import EasyTurk
-et = EasyTurk()
+et = EasyTurk(sandbox=False)
 for hit_id in hit_ids:
     et.approve_hits(hit_id)
 ```

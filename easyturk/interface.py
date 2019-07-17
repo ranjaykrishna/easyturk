@@ -50,7 +50,7 @@ def fetch_completed_hits(hit_ids, approve=True):
     et = EasyTurk()
     output = {}
     for hit_id in hit_ids:
-        results = et.get_results(hit_id, results_on_fail=False)
+        results = et.get_results(hit_id, reject_on_fail=False)
         if len(results) > 0:
             output[hit_id] = results
             if approve:
