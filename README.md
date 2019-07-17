@@ -1,13 +1,17 @@
-# EasyTurk: A easy to use wrapper to launch and get responses for custom Amazon Mechanical Turk tasks.
+# EasyTurk: A Wrapper for AMT Experiments
+
+EasyTurk is a easy to use wrapper to launch and get responses for custom Amazon Mechanical Turk tasks.
 
 If you are using this repository for your research, please use the following citation:
 
 ```
-@inproceedings{krishna2019easyturk,
-  title={EasyTurk},
-  author={Krishna, Ranjay},
-  booktitle={GitHub},
-  year={2019}
+@misc{krishna2019easyturk,
+  author = {Krishna, Ranjay},
+  title = {EasyTurk: A Wrapper for AMT Experiments},
+  year = {2019},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/ranjaykrishna/easyturk}}
 }
 ```
 
