@@ -1,6 +1,6 @@
 # EasyTurk: A Wrapper for Custom AMT Tasks
 
-EasyTurk is a easy to use wrapper to launch and get responses for custom Amazon Mechanical Turk tasks.
+EasyTurk is an easy to use wrapper to launch and get responses for custom Amazon Mechanical Turk tasks.
 
 If you are using this repository for your research, please use the following citation:
 
@@ -17,7 +17,7 @@ If you are using this repository for your research, please use the following cit
 
 #### Why should you use EasyTurk?
 
-EasyTurk is meant for Amazon Mechanical Turk requestors who want to programmatically create, launch and retrieve Amazon Mechanical Turk microtasks. EasyTurk allows you to build custom html/javascript tasks and control your tasks using a easy python wrapper.
+EasyTurk is meant for Amazon Mechanical Turk requestors who want to programmatically create, launch and retrieve Amazon Mechanical Turk microtasks. EasyTurk allows you to build custom html/javascript tasks and control your tasks using an easy python wrapper.
 
 
 #### Dependencies

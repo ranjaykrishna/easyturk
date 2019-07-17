@@ -7,6 +7,7 @@ from jinja2 import FileSystemLoader
 
 import json
 import os
+import xml
 
 
 class EasyTurk(object):
@@ -116,6 +117,23 @@ class EasyTurk(object):
         hit = self.mtc.create_hit(**hit_properties)
         return hit
 
+    def _parse_response_from_assignment(self, assignment):
+        """Parses out the worker's response from the assignment received.
+
+        Args:
+            assignment: A dictionary describing the assignment from boto.
+
+        Returns:
+            A Python object or list of the worker's response.
+        """
+        try:
+            output_tree = xml.etree.ElementTree.fromstring(assignment['Answer'])
+            output = json.loads(output_tree[0][1].text)
+            return output
+        except ValueError as e:
+            print(e)
+            return None
+
     def get_results(self, hit_id, reject_on_fail=False):
         """Retrives the output of a hit if it has finished.
 
@@ -141,8 +159,8 @@ class EasyTurk(object):
           return []
         results = []
         for a in assignments['Assignments']:
-            try:
-                output = json.loads(a['Answers'])
+            output = self._parse_response_from_assignment(a)
+            if output is not None:
                 results.append({
                     'assignment_id': a['AssignmentId'],
                     'hit_id': hit_id,
@@ -150,11 +168,10 @@ class EasyTurk(object):
                     'output': output,
                     'submit_time': a['SubmitTime'],
                 })
-            except ValueError:
-                if reject_on_fail:
-                    self.mtc.reject_assignment(
-                        AssignmentId=a['AssignmentId'],
-                        RequesterFeedback='Invalid results')
+            elif reject_on_fail:
+                self.mtc.reject_assignment(
+                    AssignmentId=a['AssignmentId'],
+                    RequesterFeedback='Invalid results')
         return results
 
     def delete_hit(self, hit_id):
@@ -195,12 +212,11 @@ class EasyTurk(object):
         reject_ids = []
         for a in assignments['Assignments']:
             if a['AssignmentStatus'] == 'Submitted':
-                try:
-                    json.loads(a['Answers'])
+                output = self._parse_response_from_assignment(a)
+                if output is not None:
                     approve_ids.append(a['AssignmentId'])
-                except ValueError:
-                    if reject_on_fail:
-                        reject_ids.append(a['AssignmentId'])
+                elif reject_on_fail:
+                    reject_ids.append(a['AssignmentId'])
 
         for assignment_id in approve_ids:
             self.mtc.approve_assignment(
@@ -227,19 +243,18 @@ class EasyTurk(object):
         """
         a = self.mtc.get_assignment(AssignmentId=assignment_id)['Assignment']
         if a['AssignmentStatus'] == 'Submitted':
-            try:
-                json.loads(a['Answer'])
+            output = self._parse_response_from_assignment(a)
+            if output is not None:
                 self.mtc.approve_assignment(
                         AssignmentId=assignment_id,
                         RequesterFeedback='Good job',
                         OverrideRejection=override_rejection)
                 return True
-            except ValueError:
-                if reject_on_fail:
-                    self.mtc.reject_assignment(
-                        AssignmentId=assignment_id,
-                        RequesterFeedback='Invalid results')
-                    return False
+            elif reject_on_fail:
+                self.mtc.reject_assignment(
+                    AssignmentId=assignment_id,
+                    RequesterFeedback='Invalid results')
+                return False
         return False
 
     def show_hit_progress(self, hit_ids):
@@ -255,7 +270,8 @@ class EasyTurk(object):
         output = {}
         for hit_id in hit_ids:
             hit = self.mtc.get_hit(HITId=hit_id)
-            completed = hit['HIT']['NumberOfAssignmentsCompleted']
+            left = hit['HIT']['NumberOfAssignmentsAvailable']
             max_assignments = hit['HIT']['MaxAssignments']
-            output[hit_id] = {'completed': completed, 'max_assignments': max_assignments}
+            output[hit_id] = {'completed': max_assignments-completed,
+                              'max_assignments': max_assignments}
         return output
