@@ -1,0 +1,276 @@
+<html>
+<head>
+  <title>Verify whether captions for pictures are accurate</title>
+  <!-- easyturk depends on these libraries -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/json3/3.3.2/json3.min.js'></script>
+  <!-- end of required libraries -->
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js'></script>
+  <style>
+    #counter {
+      margin: 0 10px;
+      font-size: 20pt;
+      font-weight: bold;
+    }
+    img {
+      height: 600px;
+    }
+    img.example {
+      height: 200px;
+    }
+    .tasks-container {
+      margin-top: 15px;
+      margin-bottom: 30px;
+      background-color: #DBDBDB;
+    }
+    .examples-container {
+      margin-top: 15px;
+      margin-bottom: 30px;
+      background-color: #9fbccb;
+    }
+    .instructions-container {
+      margin-top: 15px;
+      margin-bottom: 30px;
+      background-color: #F0EAD6;
+    }
+    p {
+      font-size: 17px;
+      text-align: center;
+    }
+    li {
+        font-size: 22px;
+    }
+    div {
+        font-size: 22px;
+    }
+  </style>
+</head>
+<body>
+<div class='container instructions-container'>
+  <div id='instructions-section'>
+    <div class='instructions'>
+      <div class='row'>
+        <div class='col-md-12'>
+          <h1>Instructions</h1>
+        </div>
+      </div>
+      <div class='row'>
+        <div class='col-md-12'>
+          <ul>
+            <li>Verify whether captions for pictures are accurate.</li>
+            <li>In this task, you will be shown a picture and a caption your task is to say whether the caption is a correct way to describe the image.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class='container tasks-container'>
+  <div class='container'>
+    <h2>Here are the captions and pictures we would like you to verify:</h2>
+  </div>
+
+  <div class='container-fluid'>
+    <div class='row'>
+      <div class='col-12'>
+        <div id='image-container'>
+        </div>
+      </div>
+    </div>
+    <br />
+    <br />
+    <div class='row justify-content-center'>
+      <div class='col-6'>
+        <h2>Verify a caption describing the contents of the image:</h2>
+        <p id='caption'></p>
+        <div class='row' style='justify-content-center' style='margin-top: 10px; padding-bottom: 10px;'>
+            <div class='col-4'>
+                <button id='wrong-btn' class='btn btn-lg btn-default'>Wrong</button>
+            </div>
+            <div class='col-4'>
+            </div>
+            <div class='col-4'>
+                <button id='correct-btn' class='btn btn-lg btn-default'>Correct</button>
+            </div>
+        </div>
+      </div>
+    </div>
+    <div class='row justify-content-center' style='margin-top: 10px; padding-bottom: 10px;'>
+      <div class='col-2'>
+        <button id='prev-btn' class='btn btn-lg btn-primary' disabled>Back</button>
+      </div>
+      <div class='col-2'>
+        <span id='counter'>
+          <span class='counter-top'></span> / <span class='counter-bottom'></span>
+        </span>
+      </div>
+      <div class='col-2'>
+        <button id='next-btn' class='btn btn-lg btn-primary' disabled>Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--IMPORTANT: This import contains all the functions you need to read in your input data and send back worker outputs.-->  
+{% include "easyturk.html" %}
+
+  <script>
+    // Define some default input.
+    // It is good practice to define standard inputs for a task which will be overwritten when launching
+    // your actual task. The default inputs allow you to render and debug your task locally.
+    var DEFAULT_INPUT = [{"url": "https://cs.stanford.edu/people/rak248/VG_100K/1160052.jpg",
+                          "caption": "This is an example caption 1"},
+                         {"url": "https://cs.stanford.edu/people/rak248/VG_100K/1160053.jpg",
+                          "caption": "This is a sample caption 2."}]
+
+    var input = null;
+
+    // This is where we will be collecting the captions for each image;
+    var options = [];
+
+    // Some variables to track state of the HIT.
+    var idx = 0;
+    var enabled = false;
+
+    function main() {
+      // If this is a HIT on AMT, then replace the default input with the real
+      // input.
+      input = easyturk.getInput(DEFAULT_INPUT);
+      console.log(input);
+
+      // Enable the task.
+      if (!easyturk.isPreview()){
+        enableTask();
+      }
+
+      // Set up the correct.
+      _.each(input, function() { options.push(null); });
+
+      // Preload all images
+      _.each(input, function(input_elem) {
+        var imgUrl = input_elem['url'];
+        var img = new Image();
+        img.onload = function() { console.log('loaded image from ' + imgUrl); };
+        img.src = imgUrl;
+      });
+
+      render();
+    }
+
+    // Use the current index to update the image and description
+    function render() {
+        // Set up the image
+        $('#image-container').empty();
+        $("<img style='width:100%; height:auto;'>").attr('src', input[idx]['url']).appendTo($('#image-container'));
+
+        // Set up the input text field
+        $('#caption').val(options[idx]);
+  
+        // Refresh the counter
+        $('.counter-top').text(idx + 1);
+        $('.counter-bottom').text(input.length);
+
+        // Setup the choice that the user already made.
+        render_verification_buttons();
+
+        // If the UI is enabled, enable or disable the buttons depending on
+        // the index.
+        if (enabled) {
+            $('#prev-btn').prop('disabled', false);
+            $('#next-btn').prop('disabled', false);
+            if (idx == 0) {
+                $('#prev-btn').prop('disabled', true);
+            }
+            if (idx == input.length - 1) {
+                $('#next-btn').prop('disabled', true);
+            }
+        }
+    }
+
+    // Render the colors of the buttons to show that user the choice they made.
+    function render_verification_buttons(){
+        if (options[idx] != null) {
+            if (options[idx]) {
+                $('#correct-btn').removeClass('btn-default').addClass('btn-success');
+                $('#wrong-btn').removeClass('btn-danger').addClass('btn-default');
+            } else {
+                $('#correct-btn').removeClass('btn-success').addClass('btn-default');
+                $('#wrong-btn').removeClass('btn-default').addClass('btn-danger');
+            }
+        } else {
+            if (options[idx]) {
+                $('#correct-btn').removeClass('btn-success').addClass('btn-default');
+                $('#wrong-btn').removeClass('btn-danger').addClass('btn-default');
+            } else {
+                $('#correct-btn').removeClass('btn-success').addClass('btn-default');
+                $('#wrong-btn').removeClass('btn-danger').addClass('btn-default');
+            }
+        }
+    }
+
+    // Activate verification buttons.
+    $('#correct-btn').click(function() {
+        saveOption(true);
+    })
+    $('#wrong-btn').click(function() {
+        saveOption(false);
+    })
+
+    // Update the index, and save the text in the text area.
+    function setIdx(newIdx) {
+        if (newIdx < 0 || newIdx >= input.length) return;
+        idx = newIdx;
+        render();
+    }
+
+    function saveOption(correct) {
+        options[idx] = correct;
+        render_verification_buttons();
+    }
+
+    // Enable the UI.
+    function enableTask() {
+      enabled = true;
+      easyturk.setupSubmit();
+
+      // Enable components
+      $('#next-btn').click(function() {
+          setIdx(idx + 1);
+      });
+      $('#prev-btn').click(function() {
+          setIdx(idx - 1);
+      });
+      $('#submit-btn').prop('disabled', false);
+
+      $('#submit-btn').click(function() {
+        // Make sure to save the last one.
+        for (var i = 0; i < input.length; i++) {
+          if (options[i] == null || options[i].length == 0) {
+            alert('You did not verify a caption for #' + (i+1));
+            return false;
+          }
+        }
+
+        // Copy the options to the output we will return to the requester.
+        var output = input;
+        for (var i = 0; i < output.length; i++) {
+          output[i]['option'] = options[i];
+        }
+        if (easyturk.isPreview()) {
+          alert("This is only a preview. Here is your output: \n" + JSON.stringify(output));
+          return false;
+        } else {
+          easyturk.setOutput(output);
+          return true;
+        }
+      });
+    }
+
+    main();
+  </script>
+</body>
+</html>
