@@ -9,7 +9,7 @@ import logging
 from easyturk import EasyTurk
 
 
-def launch_example(data, reward=1.00, tasks_per_hit=10):
+def launch_caption(data, reward=1.00, tasks_per_hit=10):
     """Launches HITs to ask workers to caption images.
 
     Args:
@@ -21,7 +21,7 @@ def launch_example(data, reward=1.00, tasks_per_hit=10):
         A list of hit ids that have been launched.
     """
     et = EasyTurk()
-    template = 'example.html'
+    template = 'caption.html'
     hit_ids = []
     i = 0
     while i < len(data):

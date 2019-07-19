@@ -68,12 +68,12 @@ This should print out how much balance you have left in your account. If you do 
 
 ## Launching an example image-captioning task on AMT.
 
-In `easyturk/templates/example.html`, there is an example image-captioning task I have already created for you. You can use that task as a reference to create your own task later. For now, let's try and see if we can render the task, launch it to AMT, then retrieve the results, and approve the assignment.
+In `easyturk/templates/caption.html`, there is an example image-captioning task I have already created for you. You can use that task as a reference to create your own task later. For now, let's try and see if we can render the task, launch it to AMT, then retrieve the results, and approve the assignment.
 
 #### Step 1: Render the task.
 The following command should render the template you built. This should allow you to locally open the task in your browser and check to make sure the functionality works. Of course, when you press the submit button, nothing will happen as you are running the task locally. But once we launch this task on AMT, the submit button will pull the worker's responses to your task and send them to AMT. We will later be able to retrieve those results.
 ```
-python easyturk/render.py --template example.html --output rendered_template.html
+python easyturk/render.py --template caption.html --output rendered_template.html
 open rendered_template.html
 ```
 
@@ -89,12 +89,12 @@ data = [
                'url': 'http://visualgenome.org/static/images/collect_sentences/computer.png',
            }
        ]
-hit_ids = interface.launch_example(data, reward=1, tasks_per_hit=10)
+hit_ids = interface.launch_caption(data, reward=1, tasks_per_hit=10)
 print(hit_ids)
 ```
 The above code will launch one HIT that will pay a reward of $1 and caption the two images in the list. Once the HIT is launched, it will return and print out the HITId. This HITId will be used to later retrieve and approve worker's responses. So make sure to NOT lose it. It's good practice to save your HITIds in a database or logfile. But if you do lose it, you can always get it back by queries for all the active HITs you have on AMT.
 
-`launch_example` is a custom launch script that sets the title, description, keywords, tasks_per_hit fields. When you later write your own HIT, I recommend create a custom launch function like this one. You can see the source code for the function in `easyturk/interface.py`.
+`launch_caption` is a custom launch script that sets the title, description, keywords, tasks_per_hit fields. When you later write your own HIT, I recommend create a custom launch function like this one. You can see the source code for the function in `easyturk/interface.py`.
 
 
 #### Step 3: Tracking your task's progress.
@@ -144,7 +144,7 @@ for hit_id in hit_ids:
 ```
 
 ## Designing your own AMT task.
-The best way to learn to create your own tasks is to mimic the high level interface of `easyturk/templates/example.html`. The main contraint to adhere to is making sure that you are using the API provided by `easyturk/templates/easyturk.html`. Currently, EasyTurk assumes that all your tasks you design will reside in one single HTML files in the `easyturk/templates/` directory
+The best way to learn to create your own tasks is to mimic the high level interface of `easyturk/templates/caption.html`. The main contraint to adhere to is making sure that you are using the API provided by `easyturk/templates/easyturk.html`. Currently, EasyTurk assumes that all your tasks you design will reside in one single HTML files in the `easyturk/templates/` directory
 
 
 #### Importing EasyTurk into your custom task.
@@ -154,7 +154,7 @@ Simply add the following line before your custom javascript to use the EasyTurk 
 ```
 
 #### Loading the data from EasyTurk.
-The task contains a `DEFAULT_INPUT` variable that should be set when designing your task such that it follows the input schema you expect. In our example task, that variable is a random list of image urls. It allows us to render and test the functionality of the task locally before launching it. When launched, make sure to call:
+The task contains a `DEFAULT_INPUT` variable that should be set when designing your task such that it follows the input schema you expect. In our example captioning task, that variable is a random list of image urls. It allows us to render and test the functionality of the task locally before launching it. When launched, make sure to call:
 ```
 var input = easyturk.getInput(DEFAULT_INPUT);
 ```
