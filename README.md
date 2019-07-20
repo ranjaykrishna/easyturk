@@ -65,6 +65,14 @@ print(et.get_account_balance())
 ```
 This should print out how much balance you have left in your account. If you do not see the amount, then there setup was not successful.
 
+#### Example tasks that you can use out of the box:
+
+1. Image captioning: `easyturk/templates/caption.html' contains a image captioning task where workers are asked to write captions for each image.
+2. Verification: `easyturk/templates/verification.html' contains a verification task that asks users to verify that a certain caption is correct for a given image.
+3. Bounding Box: `easyturk/templates/bbox.html' contains a bounding box task that asks users to annotate multiple objects per image.
+
+In the remainer of this tutorial, we will explain how you can launch the captioning task and how you can create your own tasks. The same workflow can be used for the other tasks as well.
+
 
 ## Launching an example image-captioning task on AMT.
 
