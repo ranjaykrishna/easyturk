@@ -1,0 +1,336 @@
+<html>
+  <head>
+    <title>Annotate objects in images</title>
+    <!-- easyturk depends on these libraries -->
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/json3/3.3.2/json3.min.js'></script>    
+
+    <!-- end of required libraries -->
+    <script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js'></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js'></script>
+
+    <style>
+      #text-area {
+        font-size: 20pt;
+        width:500px;
+        margin-top: 10px;
+        margin-left: auto;
+        margin-right: auto;
+        height: 100px;
+      }
+      #button-div {
+        margin-bottom: 10px;
+      }
+      #counter {
+        margin: 0 10px;
+        font-size: 20pt;
+        font-weight: bold;
+      }
+      .desc {
+        font-size: 14pt;
+      }
+    </style>
+
+  </head>
+
+  <body>
+    <div class='container'>
+      <h2>Describe image regions with text snippets</h2>
+
+      <div class="desc">
+        Hi there, we need your help annotating objects in images.<br>
+
+        <ul>
+          <li>Draw a box with your mouse around an object in the image and then tag it with the name of the object.</li>
+          <li>We want you to annotate 2 objects per image. Repeat for a few images to complete this HIT</li>
+          <li>
+            Each box should be <b>tight</b> around its object, and should <b>completely cover</b> the object.
+            <div class='row text-center'>
+              <div class='col-md-4 bbox-example bg-success'>
+                <b>Good:</b>
+                <br>
+                <img class='img-responsive' src='https://visualgenome.org/static/images/bounding_box_examples/tight_correct.jpg'>
+              </div>
+              <div class='col-md-4 bbox-example bg-danger'>
+                <b>Bad:</b>
+                <br>
+                <img class='img-responsive' src='https://visualgenome.org/static/images/bounding_box_examples/tight_wrong1.jpg'>
+              </div>
+              <div class='col-md-4 bbox-example bg-danger'>
+                <b>Bad:</b>
+                <br>
+                <img class='img-responsive' src='https://visualgenome.org/static/images/bounding_box_examples/tight_wrong2.jpg'>
+              </div>
+            </div>
+          </li>
+          <li>
+            Each box should only cover the <b>visible part</b> of all objects mentioned in the text snippet.
+            <div class='row text-center'>
+              <div class='col-md-4 col-md-offset-2 bbox-example bg-success'>
+                <b>Good:</b>
+                <br>
+                <img class='img-responsive' src='https://visualgenome.org/static/images/bounding_box_examples/vis_correct.jpg'>
+              </div>
+              <div class='col-md-4 bbox-example bg-danger'>
+                <b>Bad:</b>
+                <br>
+                <img class='img-responsive' src='https://visualgenome.org/static/images/bounding_box_examples/vis_wrong.jpg'>
+              </div>
+            </div>
+          </li>
+          <li>
+            Objects that take up a large portion of the image should be <b>completey covered</b>
+            by their boxes, such as the boxes for the <b>road</b> below:
+            <div class='row text-center'>
+              <div class='col-md-4 col-md-offset-2 bbox-example bg-success'>
+                <b>Good:</b>
+                <br>
+                <img class='img-responsive' src='https://visualgenome.org/static/images/bounding_box_examples/large-good.png'>
+              </div>
+              <div class='col-md-4 bbox-example bg-danger'>
+                <b>Bad:</b>
+                <br>
+                <img class='img-responsive' src='https://visualgenome.org/static/images/bounding_box_examples/large-bad.png'>
+              </div>
+            </div>
+          </li>
+        </ul>
+
+      </div>
+
+    <hr>
+
+    <div class="container">
+      <h3>Your task is below</h3>
+    </div>
+    <div class='container-fluid'>
+      <div class='row'>
+        <div class='col-xs-12 text-center'>
+          <div id='image-container'>
+          </div>
+        </div>
+      </div>
+      <div class='row'>
+        <div class='col-xs-12 text-center'>
+          <input id='text-area' class='form-control tb-margin' disabled>
+        </div>
+        <div class='col-sx-12 text-center'>
+          <button id='redraw' class='btn btn-lg btn-primary' disabled>Redraw Box</button>
+        </div>
+        <div class='col-xs-12 text-center' id='button-div'>
+          <button id='prev-btn' tabindex="1" class='btn btn-lg btn-primary' disabled>Back</button>
+          <span id='counter'>
+            <span class='counter-top'></span> / <span class='counter-bottom'></span>
+          </span>
+          <button id='next-btn' tabindex="0" class='btn btn-lg btn-primary' disabled>Next</button>
+        </div>
+      </div>
+    </div>
+
+
+
+<!--IMPORTANT: This import contains all the functions you need to read in your input data and send back worker outputs.-->  
+{% include "easyturk.html" %}
+<script src='javascript/bbox-drawer.js'></script>
+
+<script>
+    var DEFAULT_INPUT = [{'url': 'https://cs.stanford.edu/people/rak248/VG_100K/2349753.jpg', 'num_objects': 2},
+                         {'url': 'https://farm9.staticflickr.com/8449/7965295478_c80e1f182e_b.jpg', 'num_objects': 1},
+                         {'url': 'https://s3.amazonaws.com/visualgenomeimages/flickr_coco_1k_2/8715776190_f29e77aa10_b.jpg', 'num_objects': 1}];
+
+    // If this is a HIT on AMT, then replace the default input with the real input.
+    var input = easyturk.getInput(DEFAULT_INPUT);
+    var num_images = input.length;
+
+    // Some variables to track state of the HIT.
+    var idx = 0;
+    var enabled = false;
+    var output = [];
+    var bb = null;
+
+    function containsNonLatinCodepoints(s) {
+        return /[^\u0000-\u00ff]/.test(s);
+    }
+
+    function main() {
+
+        // Enable the UI if the HIT is not in preview mode.
+        if (true || !easyturk.isPreview()) {
+            enable_hit();
+        }
+
+        // Set up empty description blobs.
+        for(var k=0; k < num_images; k++) {
+            input[k].objects = []
+            output.push(input[k]);
+        };
+
+        render();
+    }
+
+    // Use the current index to update the image and description
+    function render() {
+      if (bb != null) {
+        bb.disable();
+        bb.remove();
+      }
+      $('#image-container').html('');
+      bb = new ETJS.BBoxDrawer($('#image-container'), input[idx]['url'], 700);
+      bb.enable();
+
+      // Set up the text area
+      if('text' in descriptions[idx]) {
+        // write text
+        $('#text-area').val(descriptions[idx].text);
+      } else {
+        // there is nothing entered for this index yet
+        $('#text-area').val('');
+      }
+
+      if('rect' in descriptions[idx] && descriptions[idx].rect !== null) {
+        // render box in its place
+        var drect = descriptions[idx].rect;
+        if(drect) {
+          //debugger;
+          bb.restoring();
+          bb.setBoxPosition(drect);
+          //bb.setStaticBox(drect);
+        }
+      } else {
+        // also put bounding box drawer into crosshair mode
+        bb.reset();
+      }
+
+      // Refresh the counter
+      $('.counter-top').text(idx + 1);
+      $('.counter-bottom').text(num_images);
+
+      // If the UI is enabled, enable or disable the buttons depending on
+      // the index.
+      if (enabled) {
+        var prev_btn = $('#prev-btn');
+        var next_btn = $('#next-btn');
+        var redraw_btn = $('#redraw');
+        redraw_btn.prop('disabled', false);
+        prev_btn.prop('disabled', true);
+        next_btn.prop('disabled', true);
+        if (idx > 0) {
+          prev_btn.prop('disabled', false);
+        }
+        if (idx < num_images - 1) next_btn.prop('disabled', false);
+      }
+    }
+
+    function mouseWasReleased() {
+        $("#text-area").focus()
+    }
+
+    // Update the index, and save the text in the text area.
+    function set_idx(new_idx) {
+        if (new_idx < 0 || new_idx >= num_images) return;
+
+        // back up current data
+        storeCurrent();
+
+        // increment index
+        idx = new_idx;
+        render();
+    }
+
+    function storeCurrent() {
+      var d = descriptions[idx];
+      d.text = $('#text-area').val();
+      d.rect = bb.getBoxPosition();
+    }
+
+    function repeated_phrase(image) {
+        /**Indicates if the object is a repeat.
+         * 
+         * Args:
+         *    image: An image dictionary with objects.
+         *
+         * Returns:
+         *    True if two objects have high IoU and same name.
+         */
+        var max_iou = 0;
+        var references = [];
+        if (image.objects == null) {
+            return False
+        }
+        for (var r = 0; r < image.objects.length; r++) {
+            references.push(image.objects[r].name);
+            if image.o
+            iou = ETJS.intersection_over_union(image.rect, desc.objects[r]);
+            if (iou > max_iou) {
+                max_iou = iou;
+            }
+        }
+      max_bleu = ETJS.max_bleu_score(desc.text, references, 3);
+      if (max_iou > 0.85 && max_bleu > 0.7) {
+        return true;
+      }
+      return false;
+    }
+
+    // Enable the UI.
+    function enable_hit() {
+      enabled = true;
+
+      // Enable components
+      $('#next-btn').click(function() {
+        set_idx(idx + 1);
+      });
+      $('#prev-btn').click(function() { set_idx(idx - 1) });
+      $('#redraw').click(function() {
+        if (bb != null) {
+          bb.disable();
+          bb.remove();
+        }
+        bb = new ETJS.BBoxDrawer($('#image-container'), input[idx]['url'], 700);
+        bb.enable();
+        bb.reset();
+      });
+      $('#text-area').prop('disabled', false);
+      $('#submit-btn').prop('disabled', false);
+
+      // Set up submit handler.
+      easyturk.setupSubmit();
+      $('#submit-btn').click(function() {
+        storeCurrent();
+
+        // validate all descriptions
+        for(var i = 0;i < num_images; i ++) {
+          var d = descriptions[i];
+          if(!('text' in d)) { 
+            alert('Error: You did not fill in description for region ' + (i+1) + '!'); 
+            return false;
+          }
+          if (d['text'] == null || d['text'] == '') {
+            alert('Error: You did not fill in description for region ' + (i+1) + '!'); 
+            return false;
+          }
+          if (containsNonLatinCodepoints(d['text'])) {
+            alert("Error: Please write a different phrase for " + (i+1) + "! '" + d['text'] + "' contains a unicode character."); 
+            return false;
+          }
+          if(!('rect' in d)) { 
+            alert('Error: You must draw a bounding box for region ' + (i+1) + '! (drag with mouse on the image)'); 
+            return false;
+          }
+          if(d.rect == null) {
+            alert('Error: You must draw a bounding box for region ' + (i+1) + '! (drag with mouse on the image)'); 
+            return false; 
+          }
+        }
+
+        // otherwise we're good. HIT done!
+        easyturk.setOutput(output);
+      });
+    }
+
+main();
+</script>
+</body>
+</html>
