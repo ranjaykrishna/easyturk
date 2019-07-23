@@ -188,7 +188,7 @@
         for (var k = 0; k < output[idx].num_objects; k++) {
 
             // Render text area.
-            var text_area = $('<input id=\'obj_' + idx + '_' + k + '\'>');
+            var text_area = $('<input id=\'obj_' + idx + '_' + k + '\' class=\'form-control tb-margin obj-name\'>');
             object_list.append(text_area)
             obj = output[idx]['objects'][k];
             if (obj.name != '') {
@@ -201,7 +201,7 @@
             if (obj.rect != null) {
                 bb.restoring();
                 bb.setBoxPosition(obj.rect);
-                var btn = $('<button id=\'btn_' + idx + '_' + k + '\' class=\'form-control tb-margin obj-name\' >');
+                var btn = $('<button id=\'btn_' + idx + '_' + k + '\' class=\'btn btn-lg btn-primary\'>');
                 btn.text('Redraw box');
                 object_list.append(btn);
                 btn.click(function(idx, k) {
@@ -211,8 +211,8 @@
                     }
                 }(idx, k));
             } else {
-                var btn = $('<button id=\'btn_' + idx + '_' + k + '\' class=\'form-control tb-margin obj-name\'>');
-                object_list.push(btn)
+                var btn = $('<button id=\'btn_' + idx + '_' + k + '\' class=\'btn btn-lg btn-primary\'>');
+                object_list.append(btn)
                 btn.text('Draw box');
                 btn.click(function(idx, k) {
                     return function() {
