@@ -223,10 +223,6 @@
       }
     }
 
-    function mouseWasReleased() {
-        $("#text-area").focus()
-    }
-
     // Update the index, and save the text in the text area.
     function set_idx(new_idx) {
         if (new_idx < 0 || new_idx >= num_images) return;
@@ -240,38 +236,39 @@
     }
 
     function storeCurrent() {
-      var d = descriptions[idx];
-      d.text = $('#text-area').val();
-      d.rect = bb.getBoxPosition();
+        var image = ouptut[idx];
+        var obj = {}
+        obj.text = $('#text-area').val();
+        obj.rect = bb.getBoxPosition();
     }
 
-    function repeated_phrase(image) {
+    function repeated_object(objects) {
         /**Indicates if the object is a repeat.
          * 
          * Args:
-         *    image: An image dictionary with objects.
+         *    objects: An list of objects.
          *
          * Returns:
          *    True if two objects have high IoU and same name.
          */
         var max_iou = 0;
         var references = [];
-        if (image.objects == null) {
+        if (objects == null) {
             return False
         }
-        for (var r = 0; r < image.objects.length; r++) {
-            references.push(image.objects[r].name);
-            if image.o
-            iou = ETJS.intersection_over_union(image.rect, desc.objects[r]);
-            if (iou > max_iou) {
-                max_iou = iou;
+        for (var r = 0; r < objects.length; r++) {
+            for (var s = r + 1; s < objects.length; s++) {
+                if (objects[r].name != objects[s].name) {
+                    continue;
+                }
+                iou = ETJS.intersection_over_union(
+                    objects[r].rect, objects[s].rect);
+                if (iou > 0.85) {
+                    return true;
+                }
             }
         }
-      max_bleu = ETJS.max_bleu_score(desc.text, references, 3);
-      if (max_iou > 0.85 && max_bleu > 0.7) {
-        return true;
-      }
-      return false;
+        return false;
     }
 
     // Enable the UI.
@@ -280,17 +277,19 @@
 
       // Enable components
       $('#next-btn').click(function() {
-        set_idx(idx + 1);
+          set_idx(idx + 1);
       });
-      $('#prev-btn').click(function() { set_idx(idx - 1) });
+      $('#prev-btn').click(function() {
+          set_idx(idx - 1)
+      });
       $('#redraw').click(function() {
-        if (bb != null) {
-          bb.disable();
-          bb.remove();
-        }
-        bb = new ETJS.BBoxDrawer($('#image-container'), input[idx]['url'], 700);
-        bb.enable();
-        bb.reset();
+          if (bb != null) {
+              bb.disable();
+              bb.remove();
+          }
+          bb = new ETJS.BBoxDrawer($('#image-container'), input[idx]['url'], 700);
+          bb.enable();
+          bb.reset();
       });
       $('#text-area').prop('disabled', false);
       $('#submit-btn').prop('disabled', false);
@@ -301,28 +300,34 @@
         storeCurrent();
 
         // validate all descriptions
-        for(var i = 0;i < num_images; i ++) {
-          var d = descriptions[i];
-          if(!('text' in d)) { 
-            alert('Error: You did not fill in description for region ' + (i+1) + '!'); 
-            return false;
-          }
-          if (d['text'] == null || d['text'] == '') {
-            alert('Error: You did not fill in description for region ' + (i+1) + '!'); 
-            return false;
-          }
-          if (containsNonLatinCodepoints(d['text'])) {
-            alert("Error: Please write a different phrase for " + (i+1) + "! '" + d['text'] + "' contains a unicode character."); 
-            return false;
-          }
-          if(!('rect' in d)) { 
-            alert('Error: You must draw a bounding box for region ' + (i+1) + '! (drag with mouse on the image)'); 
-            return false;
-          }
-          if(d.rect == null) {
-            alert('Error: You must draw a bounding box for region ' + (i+1) + '! (drag with mouse on the image)'); 
-            return false; 
-          }
+        for(var i = 0; i < num_images; i++) {
+            if (output[i].objects.length < output[i].num_objects) {
+                alert('Error: You did not create enough objects.')
+            }
+            for (var j = 0; j < output[i].objects.length; j++) {
+                obj = output[i].objects[j]
+                if(!('text' in obj)) { 
+                    alert('Error: You did not fill in a object name in image ' + (i + 1) + '!'); 
+                    return false;
+                }
+                if (obj.name == null || obj.name == '') {
+                    alert('Error: You did not fill in a object name in image ' + (i + 1) + '!'); 
+                    return false;
+                }
+                if (containsNonLatinCodepoints(obj.name)) {
+                    alert("Error: Please write a different phrase for " + (i + 1) + "! '" + obj.name + "' contains a unicode character."); 
+                    return false;
+                }
+                if(!('rect' in obj)) { 
+                    alert('Error: You must draw a bounding box for region ' + (i + 1) + '! (Use your mouse on the image.)'); 
+                    return false;
+                }
+                if(obj.rect == null) {
+                    alert('Error: You must draw a bounding box for region ' + (i + 1) + '! (Use your mouse on the image.)'); 
+                    return false; 
+                }
+
+            }
         }
 
         // otherwise we're good. HIT done!
