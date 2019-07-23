@@ -134,7 +134,9 @@
 
 <!--IMPORTANT: This import contains all the functions you need to read in your input data and send back worker outputs.-->  
 {% include "easyturk.html" %}
-<script src='javascript/bbox-drawer.js'></script>
+<script>
+    {% include "javascript/bbox-drawer.js" %}
+</script>
 
 <script>
     var DEFAULT_INPUT = [{'url': 'https://cs.stanford.edu/people/rak248/VG_100K/2349753.jpg', 'num_objects': 2},
@@ -171,8 +173,33 @@
             output.push(input[k]);
         };
 
+        // Load the images.
+        _.each(output, function(input_elem) {
+            var imgUrl = input_elem['url'];
+            var img = new Image();
+            img.onload = function() { 
+                output[idx].image_width = img.width;
+            };
+            img.src = imgUrl;
+        });
+
         // Render the objects and the bounding box interaction.
         set_idx(idx);
+    }
+
+    function add_existing_boxes(bb) {
+        /** Draws the existing bounding boxes to the image.
+         *
+         * Args:
+         *   bb: ETJS.BBoxDrawer instance.
+         */
+        for (var k = 0; k < output[idx].num_objects; k++) {
+            obj = output[idx].objects[k];
+            if (obj.rect != null) {
+                index = bb.addStaticBox(obj.rect);
+                obj.static_index = index;
+            }
+        }
     }
 
     // Use the current index to update the image and description.
@@ -182,8 +209,13 @@
             bb.remove();
         }
         $('#image-container').html('');
-        bb = new ETJS.BBoxDrawer($('#image-container'), input[idx]['url'], 700);
-        bb.enable();
+        options = {}
+        if (output[idx].image_width != null) {
+            options.image_width = output[idx].image_width;
+        }
+        bb = new ETJS.BBoxDrawer($('#image-container'), input[idx]['url'], 1000, options);
+        bb.reset();
+        add_existing_boxes(bb);
 
         // Set up the object area.
         var object_list = $('#object-list');
@@ -198,35 +230,80 @@
             var text_area = $('<input id=\'obj_' + idx + '_' + k + '\' class=\'form-control tb-margin obj-name\'>');
             text_col.append(text_area);
             obj = output[idx]['objects'][k];
-            if (obj.name != '') {
+            if (obj.name != null && obj.name != '') {
                 text_area.val(obj.name);
             } else {
                 text_area.prop('placeholder', 'Enter object name here');
             }
 
+            // Create buttons elements.
             var btn_col = $('<div class=\'col-md-4\' align=\'left\'>');
             obj_row.append(btn_col);
-            var btn = $('<button id=\'btn_' + idx + '_' + k + '\' class=\'btn btn-lg btn-primary obj-btn\'>');
-            btn_col.append(btn);
-            // Render buttons.
+
+            var redraw_btn = $('<button id=\'redraw-btn_' + idx + '_' + k + '\' class=\'btn btn-lg btn-danger obj-btn\'>');
+            redraw_btn.text('Redraw box');
+
+            var btn = $('<button id=\'draw-btn_' + idx + '_' + k + '\' class=\'btn btn-lg btn-success obj-btn\'>');
+            btn.text('Draw box');
+
+            // Setup save interaction.
+            var save_btn = $('<button id=\'save-btn_' + idx + '_' + k + '\' class=\'btn btn-lg btn-primary obj-btn\'>');
+            save_btn.text('Save box');
+            save_btn.click(function(btn_col, save_btn, redraw_btn, idx, k) {
+                // Get the drawn bbox.
+                // If it is not null, save it to output.
+                // Remove the bbox from bb box variable.
+                // Add the bbox to the bb static_box list.
+                // Save the static_box index so that we can delete it later.
+                // Remove the save button.
+                // Add the redraw button.
+                return function() {
+                    box = bb.getBoxPosition();
+                    if (box != null) {
+                        output[idx].objects[k].rect = box;
+                        bb.removeBox();
+                        //index = bb.addStaticBox(box);
+                        //output[idx].objects[k].static_index = index;
+                        storeCurrent();
+                        render();
+                    }
+                }
+            }(btn_col, save_btn, redraw_btn, idx, k));
+
+            // Setup redraw interaction.
+            redraw_btn.click(function(btn_col, redraw_btn, save_btn, idx, k) {
+                // Get the static box index to delete.
+                // Delete the static box.
+                // Remove btn from obj_col.
+                // Add save_btn to obj_col.
+                // Reset drawing.
+                return function() {
+                    index = output[idx].objects[k].static_index;
+                    bb.removeStaticBox(index);
+                    redraw_btn.remove();
+                    btn_col.append(save_btn);
+                    bb.enable();
+                    bb.reset();
+                }
+            }(btn_col, redraw_btn, save_btn, idx, k));
+
+
             if (obj.rect != null) {
+                // Setup redraw button.
+                btn_col.append(redraw_btn);
                 bb.restoring();
                 bb.setBoxPosition(obj.rect);
-                btn.text('Redraw box');
-                btn.click(function(idx, k) {
-                    return function() {
-                        bb.reset();
-                        output[idx].objects[k].rect = bb.getBoxPosition();
-                    }
-                }(idx, k));
             } else {
-                btn.text('Draw box');
-                btn.click(function(idx, k) {
+                // Draw button.
+                btn_col.append(btn);
+                btn.click(function(btn_col, btn, save_btn) {
                     return function() {
+                        btn.remove();
+                        btn_col.append(save_btn);
+                        bb.enable();
                         bb.reset();
-                        output[idx].objects[k].rect = bb.getBoxPosition();
                     }
-                }(idx, k));
+                }(btn_col, btn, save_btn));
             }
         }
     }
@@ -266,7 +343,7 @@
         var image = output[idx];
         for (var k = 0; k < image.num_objects; k++) {
             obj = image.objects[k];
-            obj.text = $('#obj_' + idx + '_' + k).val();
+            obj.name = $('#obj_' + idx + '_' + k).val();
         }
     }
 
@@ -310,49 +387,37 @@
         $('#prev-btn').click(function() {
             set_idx(idx - 1)
         });
-        /*
-        $('#redraw').click(function() {
-            if (bb != null) {
-                bb.disable();
-                bb.remove();
-            }
-          bb = new ETJS.BBoxDrawer($('#image-container'), input[idx]['url'], 700);
-          bb.enable();
-          bb.reset();
-      });
-      $('#text-area').prop('disabled', false);
-      */
+        
+        // Set up submit handler.
+        $('#submit-btn').prop('disabled', false);
+        easyturk.setupSubmit();
+        $('#submit-btn').click(function() {
+            storeCurrent();
 
-      // Set up submit handler.
-      $('#submit-btn').prop('disabled', false);
-      easyturk.setupSubmit();
-      $('#submit-btn').click(function() {
-        storeCurrent();
-
-        // validate all descriptions
-        for(var i = 0; i < num_images; i++) {
-            if (output[i].objects.length < output[i].num_objects) {
-                alert('Error: You did not create enough objects.')
-            }
-            for (var j = 0; j < output[i].num_objects; j++) {
-                obj = output[i].objects[j]
-                if (obj.name == null || obj.name == '') {
-                    alert('Error: You did not fill in a object name in image ' + (i + 1) + '!'); 
-                    return false;
+            // validate all descriptions
+            for(var i = 0; i < num_images; i++) {
+                if (output[i].objects.length < output[i].num_objects) {
+                    alert('Error: You did not create enough objects.')
                 }
-                if (containsNonLatinCodepoints(obj.name)) {
-                    alert("Error: Please write a different phrase for " + (i + 1) + "! '" + obj.name + "' contains a unicode character."); 
-                    return false;
-                }
-                if(obj.rect == null) {
-                    alert('Error: You must draw a bounding box for region ' + (i + 1) + '! (Use your mouse on the image.)'); 
-                    return false; 
+                for (var j = 0; j < output[i].num_objects; j++) {
+                    obj = output[i].objects[j]
+                    if (obj.name == null || obj.name == '') {
+                        alert('Error: You did not fill in a object name in image ' + (i + 1) + '!'); 
+                        return false;
+                    }
+                    if (containsNonLatinCodepoints(obj.name)) {
+                        alert("Error: Please write a different phrase for " + (i + 1) + "! '" + obj.name + "' contains a unicode character."); 
+                        return false;
+                    }
+                    if(obj.rect == null) {
+                        alert('Error: You must draw a bounding box for region ' + (i + 1) + '! (Use your mouse on the image.)'); 
+                        return false; 
+                    }
                 }
             }
-        }
 
-        // otherwise we're good. HIT done!
-        easyturk.setOutput(output);
+            // otherwise we're good. HIT done!
+            easyturk.setOutput(output);
       });
     }
 
