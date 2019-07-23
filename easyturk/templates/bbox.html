@@ -12,13 +12,18 @@
     <script src='https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js'></script>
 
     <style>
+      .obj-btn {
+        margin-top: 20px;
+        margin-top: 20px;
+        font-size: 15pt;
+      }
       .obj-name {
         font-size: 20pt;
-        width:500px;
-        margin-top: 10px;
-        margin-left: auto;
-        margin-right: auto;
-        height: 100px;
+        width: 500px;
+        margin-top: 20px;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        height: 50px;
       }
       #button-div {
         margin-bottom: 10px;
@@ -29,7 +34,7 @@
         font-weight: bold;
       }
       .desc {
-        font-size: 14pt;
+        font-size: 12pt;
       }
     </style>
 
@@ -112,8 +117,6 @@
           </div>
         </div>
         <div id='object-list' class='col-xs-12 text-center'>
-          <input id='text-area' class='form-control tb-margin' disabled>
-          <button id='redraw' class='btn btn-lg btn-primary' disabled>Redraw Box</button>
         </div>
       </div>
       <div class='row'>
@@ -188,8 +191,12 @@
         for (var k = 0; k < output[idx].num_objects; k++) {
 
             // Render text area.
+            var obj_row = $('<div class=\'row\'>');
+            object_list.append(obj_row);
+            var text_col = $('<div class=\'col-md-8\' align=\'right\'>');
+            obj_row.append(text_col);
             var text_area = $('<input id=\'obj_' + idx + '_' + k + '\' class=\'form-control tb-margin obj-name\'>');
-            object_list.append(text_area)
+            text_col.append(text_area);
             obj = output[idx]['objects'][k];
             if (obj.name != '') {
                 text_area.val(obj.name);
@@ -197,13 +204,15 @@
                 text_area.prop('placeholder', 'Enter object name here');
             }
 
+            var btn_col = $('<div class=\'col-md-4\' align=\'left\'>');
+            obj_row.append(btn_col);
+            var btn = $('<button id=\'btn_' + idx + '_' + k + '\' class=\'btn btn-lg btn-primary obj-btn\'>');
+            btn_col.append(btn);
             // Render buttons.
             if (obj.rect != null) {
                 bb.restoring();
                 bb.setBoxPosition(obj.rect);
-                var btn = $('<button id=\'btn_' + idx + '_' + k + '\' class=\'btn btn-lg btn-primary\'>');
                 btn.text('Redraw box');
-                object_list.append(btn);
                 btn.click(function(idx, k) {
                     return function() {
                         bb.reset();
@@ -211,8 +220,6 @@
                     }
                 }(idx, k));
             } else {
-                var btn = $('<button id=\'btn_' + idx + '_' + k + '\' class=\'btn btn-lg btn-primary\'>');
-                object_list.append(btn)
                 btn.text('Draw box');
                 btn.click(function(idx, k) {
                     return function() {
