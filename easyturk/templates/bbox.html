@@ -12,7 +12,7 @@
     <script src='https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js'></script>
 
     <style>
-      #text-area {
+      .obj-name {
         font-size: 20pt;
         width:500px;
         margin-top: 10px;
@@ -44,7 +44,7 @@
 
         <ul>
           <li>Draw a box with your mouse around an object in the image and then tag it with the name of the object.</li>
-          <li>We want you to annotate 2 objects per image. Repeat for a few images to complete this HIT</li>
+          <li>We will show you images one by one and ask you to annoate a certain number of objects. Repeat for a few images to complete this HIT.</li>
           <li>
             Each box should be <b>tight</b> around its object, and should <b>completely cover</b> the object.
             <div class='row text-center'>
@@ -111,14 +111,12 @@
           <div id='image-container'>
           </div>
         </div>
-      </div>
-      <div class='row'>
-        <div class='col-xs-12 text-center'>
+        <div id='object-list' class='col-xs-12 text-center'>
           <input id='text-area' class='form-control tb-margin' disabled>
-        </div>
-        <div class='col-sx-12 text-center'>
           <button id='redraw' class='btn btn-lg btn-primary' disabled>Redraw Box</button>
         </div>
+      </div>
+      <div class='row'>
         <div class='col-xs-12 text-center' id='button-div'>
           <button id='prev-btn' tabindex="1" class='btn btn-lg btn-primary' disabled>Back</button>
           <span id='counter'>
@@ -162,84 +160,107 @@
         }
 
         // Set up empty description blobs.
-        for(var k=0; k < num_images; k++) {
-            input[k].objects = []
+        for(var k = 0; k < num_images; k++) {
+            input[k].objects = [];
+            for (var l = 0; l < input[k].num_objects; l++) {
+                input[k].objects.push({'name': '', 'rect': null});
+            }
             output.push(input[k]);
         };
 
-        render();
+        // Render the objects and the bounding box interaction.
+        set_idx(idx);
     }
 
-    // Use the current index to update the image and description
+    // Use the current index to update the image and description.
     function render() {
-      if (bb != null) {
-        bb.disable();
-        bb.remove();
-      }
-      $('#image-container').html('');
-      bb = new ETJS.BBoxDrawer($('#image-container'), input[idx]['url'], 700);
-      bb.enable();
-
-      // Set up the text area
-      if('text' in descriptions[idx]) {
-        // write text
-        $('#text-area').val(descriptions[idx].text);
-      } else {
-        // there is nothing entered for this index yet
-        $('#text-area').val('');
-      }
-
-      if('rect' in descriptions[idx] && descriptions[idx].rect !== null) {
-        // render box in its place
-        var drect = descriptions[idx].rect;
-        if(drect) {
-          //debugger;
-          bb.restoring();
-          bb.setBoxPosition(drect);
-          //bb.setStaticBox(drect);
+        if (bb != null) {
+            bb.disable();
+            bb.remove();
         }
-      } else {
-        // also put bounding box drawer into crosshair mode
-        bb.reset();
-      }
+        $('#image-container').html('');
+        bb = new ETJS.BBoxDrawer($('#image-container'), input[idx]['url'], 700);
+        bb.enable();
 
-      // Refresh the counter
-      $('.counter-top').text(idx + 1);
-      $('.counter-bottom').text(num_images);
+        // Set up the object area.
+        var object_list = $('#object-list');
+        object_list.empty();
+        for (var k = 0; k < output[idx].num_objects; k++) {
 
-      // If the UI is enabled, enable or disable the buttons depending on
-      // the index.
-      if (enabled) {
-        var prev_btn = $('#prev-btn');
-        var next_btn = $('#next-btn');
-        var redraw_btn = $('#redraw');
-        redraw_btn.prop('disabled', false);
-        prev_btn.prop('disabled', true);
-        next_btn.prop('disabled', true);
-        if (idx > 0) {
-          prev_btn.prop('disabled', false);
+            // Render text area.
+            var text_area = $('<input id=\'obj_' + idx + '_' + k + '\'>');
+            object_list.append(text_area)
+            obj = output[idx]['objects'][k];
+            if (obj.name != '') {
+                text_area.val(obj.name);
+            } else {
+                text_area.prop('placeholder', 'Enter object name here');
+            }
+
+            // Render buttons.
+            if (obj.rect != null) {
+                bb.restoring();
+                bb.setBoxPosition(obj.rect);
+                var btn = $('<button id=\'btn_' + idx + '_' + k + '\' class=\'form-control tb-margin obj-name\' >');
+                btn.text('Redraw box');
+                object_list.append(btn);
+                btn.click(function(idx, k) {
+                    return function() {
+                        bb.reset();
+                        output[idx].objects[k].rect = bb.getBoxPosition();
+                    }
+                }(idx, k));
+            } else {
+                var btn = $('<button id=\'btn_' + idx + '_' + k + '\' class=\'form-control tb-margin obj-name\'>');
+                object_list.push(btn)
+                btn.text('Draw box');
+                btn.click(function(idx, k) {
+                    return function() {
+                        bb.reset();
+                        output[idx].objects[k].rect = bb.getBoxPosition();
+                    }
+                }(idx, k));
+            }
         }
-        if (idx < num_images - 1) next_btn.prop('disabled', false);
-      }
     }
 
-    // Update the index, and save the text in the text area.
+    // Update the index, and save the text in the text area and render new data.
     function set_idx(new_idx) {
         if (new_idx < 0 || new_idx >= num_images) return;
 
-        // back up current data
+        // back up current data.
         storeCurrent();
 
-        // increment index
+        // increment index.
         idx = new_idx;
+
+        // Render new data.
         render();
+
+        // If the UI is enabled, enable or disable the buttons depending on
+        // the index.
+        if (enabled) {
+            var prev_btn = $('#prev-btn');
+            var next_btn = $('#next-btn');
+            prev_btn.prop('disabled', true);
+            next_btn.prop('disabled', true);
+            if (idx > 0) {
+                prev_btn.prop('disabled', false);
+            }
+            if (idx < num_images - 1) next_btn.prop('disabled', false);
+        }
+
+        // Refresh the counter.
+        $('.counter-top').text(idx + 1);
+        $('.counter-bottom').text(num_images);
     }
 
     function storeCurrent() {
-        var image = ouptut[idx];
-        var obj = {}
-        obj.text = $('#text-area').val();
-        obj.rect = bb.getBoxPosition();
+        var image = output[idx];
+        for (var k = 0; k < image.num_objects; k++) {
+            obj = image.objects[k];
+            obj.text = $('#obj_' + idx + '_' + k).val();
+        }
     }
 
     function repeated_object(objects) {
@@ -273,28 +294,30 @@
 
     // Enable the UI.
     function enable_hit() {
-      enabled = true;
+        enabled = true;
 
-      // Enable components
-      $('#next-btn').click(function() {
-          set_idx(idx + 1);
-      });
-      $('#prev-btn').click(function() {
-          set_idx(idx - 1)
-      });
-      $('#redraw').click(function() {
-          if (bb != null) {
-              bb.disable();
-              bb.remove();
-          }
+        // Enable components
+        $('#next-btn').click(function() {
+            set_idx(idx + 1);
+        });
+        $('#prev-btn').click(function() {
+            set_idx(idx - 1)
+        });
+        /*
+        $('#redraw').click(function() {
+            if (bb != null) {
+                bb.disable();
+                bb.remove();
+            }
           bb = new ETJS.BBoxDrawer($('#image-container'), input[idx]['url'], 700);
           bb.enable();
           bb.reset();
       });
       $('#text-area').prop('disabled', false);
-      $('#submit-btn').prop('disabled', false);
+      */
 
       // Set up submit handler.
+      $('#submit-btn').prop('disabled', false);
       easyturk.setupSubmit();
       $('#submit-btn').click(function() {
         storeCurrent();
@@ -304,12 +327,8 @@
             if (output[i].objects.length < output[i].num_objects) {
                 alert('Error: You did not create enough objects.')
             }
-            for (var j = 0; j < output[i].objects.length; j++) {
+            for (var j = 0; j < output[i].num_objects; j++) {
                 obj = output[i].objects[j]
-                if(!('text' in obj)) { 
-                    alert('Error: You did not fill in a object name in image ' + (i + 1) + '!'); 
-                    return false;
-                }
                 if (obj.name == null || obj.name == '') {
                     alert('Error: You did not fill in a object name in image ' + (i + 1) + '!'); 
                     return false;
@@ -318,15 +337,10 @@
                     alert("Error: Please write a different phrase for " + (i + 1) + "! '" + obj.name + "' contains a unicode character."); 
                     return false;
                 }
-                if(!('rect' in obj)) { 
-                    alert('Error: You must draw a bounding box for region ' + (i + 1) + '! (Use your mouse on the image.)'); 
-                    return false;
-                }
                 if(obj.rect == null) {
                     alert('Error: You must draw a bounding box for region ' + (i + 1) + '! (Use your mouse on the image.)'); 
                     return false; 
                 }
-
             }
         }
 

@@ -103,6 +103,7 @@ var ETJS = (function(etjs) {
                     'w': Math.floor(toImageCoords(bbox.w)),
                     'h': Math.floor(toImageCoords(bbox.h))
                 };
+
             }
             return null;
         }
@@ -269,7 +270,6 @@ var ETJS = (function(etjs) {
                 bbox_drawn = true;
                 setCursor('pointer');
             }
-            mouseWasReleased();
             draw();
         }
 
