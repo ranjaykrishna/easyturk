@@ -67,21 +67,21 @@ This should print out how much balance you have left in your account. If you do 
 
 #### Example tasks that you can use out of the box:
 
-1. Image captioning: `easyturk/templates/caption.html' contains a image captioning task where workers are asked to write captions for each image.
-2. Verification: `easyturk/templates/verification.html' contains a verification task that asks users to verify that a certain caption is correct for a given image.
-3. Bounding Box: `easyturk/templates/bbox.html' contains a bounding box task that asks users to annotate multiple objects per image.
+1. Image captioning: `easyturk/templates/write_caption.html' contains a image captioning task where workers are asked to write captions for each image.
+2. Verification: `easyturk/templates/verify_caption.html' contains a verification task that asks users to verify that a certain caption is correct for a given image.
+3. Bounding Box: `easyturk/templates/annotate_bbox.html' contains a bounding box task that asks users to annotate multiple objects per image.
 
 In the remainer of this tutorial, we will explain how you can launch the captioning task and how you can create your own tasks. The same workflow can be used for the other tasks as well.
 
 
 ## Launching an example image-captioning task on AMT.
 
-In `easyturk/templates/caption.html`, there is an example image-captioning task I have already created for you. You can use that task as a reference to create your own task later. For now, let's try and see if we can render the task, launch it to AMT, then retrieve the results, and approve the assignment.
+In `easyturk/templates/write_caption.html`, there is an example image-captioning task I have already created for you. You can use that task as a reference to create your own task later. For now, let's try and see if we can render the task, launch it to AMT, then retrieve the results, and approve the assignment.
 
 #### Step 1: Render the task.
 The following command should render the template you built. This should allow you to locally open the task in your browser and check to make sure the functionality works. Of course, when you press the submit button, nothing will happen as you are running the task locally. But once we launch this task on AMT, the submit button will pull the worker's responses to your task and send them to AMT. We will later be able to retrieve those results.
 ```
-python easyturk/render.py --template caption.html --output rendered_template.html
+python easyturk/render.py --template write_caption.html --output rendered_template.html
 open rendered_template.html
 ```
 
@@ -152,7 +152,7 @@ for hit_id in hit_ids:
 ```
 
 ## Designing your own AMT task.
-The best way to learn to create your own tasks is to mimic the high level interface of `easyturk/templates/caption.html`. The main contraint to adhere to is making sure that you are using the API provided by `easyturk/templates/easyturk.html`. Currently, EasyTurk assumes that all your tasks you design will reside in one single HTML files in the `easyturk/templates/` directory
+The best way to learn to create your own tasks is to mimic the high level interface of `easyturk/templates/write_caption.html`. The main contraint to adhere to is making sure that you are using the API provided by `easyturk/templates/easyturk.html`. Currently, EasyTurk assumes that all your tasks you design will reside in one single HTML files in the `easyturk/templates/` directory
 
 
 #### Importing EasyTurk into your custom task.

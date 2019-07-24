@@ -1,2 +1,4 @@
 env/
 *.pyc
+rendered_template.html
+easyturk/rendered_template.html
