@@ -146,8 +146,8 @@
     <br />
     <div class='row justify-content-center'>
       <div class='col-6'>
-        <h2>Verify that the box and the object are correctly annotated in the picture:</h2>
-        <p id='name'></p>
+        <h3>Answer the three questions below.</h3>
+        <h2>The name of the object is <span id='object-name' style='color: red;'></span></h2>
         <div class='row' style='justify-content-center' style='margin-top: 10px; padding-bottom: 10px;'>
             <div class='col-4'>
                 <button id='wrong-name-btn' class='btn btn-lg btn-secondary'>Wrong name</button>
@@ -210,12 +210,12 @@
                           "name": "object name 1",
                           "box": {"x": 20, "y": 10, "w": 100, "h": 200}},
                          {"url": "https://cs.stanford.edu/people/rak248/VG_100K/1160053.jpg",
-                          "caption": "object name 2",
+                          "name": "object name 2",
                           "box": {"x": 90, "y": 30, "w": 150, "h": 100}}]
 
     var input = null;
 
-    // This is where we will be collecting the captions for each image;
+    // This is where we will be collecting the verifications for each image;
     var options = [];
 
     // Some variables to track state of the HIT.
@@ -277,10 +277,9 @@
         bb = new ETJS.BBoxDrawer($('#image-container'), input[idx]['url'], 1000);
         bb.reset();
         bb.addStaticBox(input[idx].box);
-        //$("<img style='width:100%; height:auto;'>").attr('src', input[idx]['url']).appendTo($('#image-container'));
 
         // Set up the input text field
-        $('#name').val(input[idx].name);
+        $('#object-name').text(input[idx].name);
   
         // Refresh the counter
         $('.counter-top').text(idx + 1);
