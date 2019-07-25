@@ -9,6 +9,33 @@ import logging
 from easyturk import EasyTurk
 
 
+def launch_verify_bbox(data, reward=1.00, tasks_per_hit=30):
+    """Launches HITs to ask workers to verify bounding boxes.
+
+    Args:
+        data: List containing image urls, objects, for the task.
+        reward: A postive valued dollar amount per task.
+        tasks_per_hit: Number of images per hit.
+
+    Returns:
+        A list of hit ids that have been launched.
+    """
+    et = EasyTurk()
+    template = 'verify_bbox.html'
+    hit_ids = []
+    i = 0
+    while i < len(data):
+        hit = et.launch_hit(
+            template, data[i:i+tasks_per_hit], reward=reward,
+            title='Verify objects in pictures',
+            description=('Verify whether objects are correctly identified in pictures.'),
+            keywords='image, text, picture, object, bounding box')
+        hit_id = hit['HIT']['HITId']
+        hit_ids.append(hit_id)
+        i += tasks_per_hit
+    return hit_ids
+
+
 def launch_caption(data, reward=1.00, tasks_per_hit=10):
     """Launches HITs to ask workers to caption images.
 
@@ -21,7 +48,7 @@ def launch_caption(data, reward=1.00, tasks_per_hit=10):
         A list of hit ids that have been launched.
     """
     et = EasyTurk()
-    template = 'caption.html'
+    template = 'write_caption.html'
     hit_ids = []
     i = 0
     while i < len(data):
