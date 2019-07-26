@@ -2,6 +2,7 @@
 """
 
 from boto3 import Session
+from datetime import datetime
 from jinja2 import Environment
 from jinja2 import FileSystemLoader
 
@@ -20,21 +21,21 @@ class EasyTurk(object):
         Args:
             sandbox: Whether we are launching on sandbox.
         """
-	environments = {
-	  "production": {
-	    "endpoint": "https://mturk-requester.us-east-1.amazonaws.com",
-	    "preview": "https://www.mturk.com/mturk/preview"
-	  },
-	  "sandbox": {
-	    "endpoint":
-		  "https://mturk-requester-sandbox.us-east-1.amazonaws.com",
-	    "preview": "https://workersandbox.mturk.com/mturk/preview"
-	  },
-	}
+        environments = {
+                "production": {
+                    "endpoint": "https://mturk-requester.us-east-1.amazonaws.com",
+                    "preview": "https://www.mturk.com/mturk/preview"
+                },
+                "sandbox": {
+                    "endpoint": "https://mturk-requester-sandbox.us-east-1.amazonaws.com",
+                    "preview": "https://workersandbox.mturk.com/mturk/preview"
+                },
+        }
         self.sandbox = sandbox
-        env = environments['sandbox'] if sandbox else environments["production"]
-	self.session = Session(profile_name='mturk')
-	self.mtc = self.session.client(
+        env = (environments['sandbox'] if sandbox
+               else environments["production"])
+        self.session = Session(profile_name='mturk')
+        self.mtc = self.session.client(
                 service_name='mturk',
                 region_name='us-east-1',
                 endpoint_url=env['endpoint'],
@@ -155,8 +156,8 @@ class EasyTurk(object):
         try:
             assignments = self.mtc.list_assignments_for_hit(
                     HITId=hit_id, AssignmentStatuses=status)
-        except:
-          return []
+        except Exception:
+            return []
         results = []
         for a in assignments['Assignments']:
             output = self._parse_response_from_assignment(a)
@@ -184,10 +185,18 @@ class EasyTurk(object):
             A boolean indicating success.
         """
         try:
-            self.mtc.disable_hit(HITId=hit_id)
+            self.mtc.delete_hit(HITId=hit_id)
             return True
-        except:
-            return False
+        except Exception:
+            try:
+                self.mtc.update_expiration_for_hit(
+                        HITId=hit_id,
+                        ExpireAt=datetime.now())
+                self.mtc.delete_hit(HITId=hit_id)
+                return True
+            except Exception as e:
+                print e
+                return False
 
     def approve_hit(self, hit_id, reject_on_fail=False,
                     override_rejection=False):
@@ -275,3 +284,12 @@ class EasyTurk(object):
             output[hit_id] = {'completed': max_assignments-completed,
                               'max_assignments': max_assignments}
         return output
+
+    def list_hits(self):
+        """Lists the HITs that have already been launched.
+
+        Returns:
+            A list of HITs.
+        """
+        hits = self.mtc.list_hits()['HITs']
+        return hits
