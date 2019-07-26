@@ -148,7 +148,7 @@ If you are happy with the work, you can approve and pay your workers by issuing 
 from easyturk import EasyTurk
 et = EasyTurk(sandbox=False)
 for hit_id in hit_ids:
-    et.approve_hits(hit_id)
+    et.approve_hit(hit_id)
 ```
 
 ## Designing your own AMT task.
