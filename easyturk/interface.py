@@ -1,26 +1,22 @@
 """Functions to launch, retrieve, and parse specific EasyTurk tasks.
 """
 
-from random import shuffle
-
-import json
-import logging
-
 from easyturk import EasyTurk
 
 
-def launch_verify_bbox(data, reward=1.00, tasks_per_hit=30):
+def launch_verify_bbox(data, reward=1.00, tasks_per_hit=30, sandbox=False):
     """Launches HITs to ask workers to verify bounding boxes.
 
     Args:
         data: List containing image urls, objects, for the task.
         reward: A postive valued dollar amount per task.
         tasks_per_hit: Number of images per hit.
+        sandbox: Whether to interact on sandbox or production.
 
     Returns:
         A list of hit ids that have been launched.
     """
-    et = EasyTurk()
+    et = EasyTurk(sandbox=sandbox)
     template = 'verify_bbox.html'
     hit_ids = []
     i = 0
@@ -36,18 +32,19 @@ def launch_verify_bbox(data, reward=1.00, tasks_per_hit=30):
     return hit_ids
 
 
-def launch_caption(data, reward=1.00, tasks_per_hit=10):
+def launch_caption(data, reward=1.00, tasks_per_hit=10, sandbox=False):
     """Launches HITs to ask workers to caption images.
 
     Args:
         data: List containing image urls for the task.
         reward: A postive valued dollar amount per task.
         tasks_per_hit: Number of images per hit.
+        sandbox: Whether to interact on sandbox or production.
 
     Returns:
         A list of hit ids that have been launched.
     """
-    et = EasyTurk()
+    et = EasyTurk(sandbox=sandbox)
     template = 'write_caption.html'
     hit_ids = []
     i = 0
@@ -63,18 +60,19 @@ def launch_caption(data, reward=1.00, tasks_per_hit=10):
     return hit_ids
 
 
-def fetch_completed_hits(hit_ids, approve=True):
+def fetch_completed_hits(hit_ids, approve=True, sandbox=False):
     """Grabs the results for the hit ids.
 
     Args:
         hit_ids: A list of hit ids to fetch.
         approve: Whether to approve the hits that have been submitted.
+        sandbox: Whether to interact on sandbox or production.
 
     Returns:
         A dictionary from hit_id to the result, if that hit_id has
         been submitted.
     """
-    et = EasyTurk()
+    et = EasyTurk(sandbox=sandbox)
     output = {}
     for hit_id in hit_ids:
         results = et.get_results(hit_id, reject_on_fail=False)
