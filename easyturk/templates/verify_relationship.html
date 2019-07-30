@@ -1,0 +1,374 @@
+<html>
+<head>
+  <title>Verify whether relationships between objects in pictures are accurate</title>
+  <!-- easyturk depends on these libraries -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/json3/3.3.2/json3.min.js'></script>
+  <!-- end of required libraries -->
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js'></script>
+  <style>
+    #counter {
+      margin: 0 10px;
+      font-size: 20pt;
+      font-weight: bold;
+    }
+    img {
+      height: 600px;
+    }
+    img.example {
+      height: 200px;
+    }
+    .tasks-container {
+      margin-top: 15px;
+      margin-bottom: 30px;
+      background-color: #DBDBDB;
+    }
+    .examples-container {
+      margin-top: 15px;
+      margin-bottom: 30px;
+      background-color: #9fbccb;
+    }
+    .instructions-container {
+      margin-top: 15px;
+      margin-bottom: 30px;
+      background-color: #F0EAD6;
+    }
+    p {
+      font-size: 17px;
+      text-align: center;
+    }
+    li {
+        font-size: 22px;
+    }
+    div {
+        font-size: 22px;
+    }
+    button {
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+<div class='container instructions-container'>
+  <div id='instructions-section'>
+    <div class='instructions'>
+      <div class='row'>
+        <div class='col-12'>
+          <h1>Instructions</h1>
+        </div>
+      </div>
+      <div class='row'>
+        <div class='col-12'>
+          <ul>
+            <li>Verify whether relationships between objects in pictures are accurate.</li>
+            <li>In this task, you will be shown a list of pictures and and asked to verify if a relationship is accurate.</li>
+            <li>First, let's explain what a <b>RELATIONSHIP</b> is. A relationship consists of 3 parts: &#60;object_1, predicate, object_2&#62;. 
+                The predicate explains how object_1 is related to object_2. For example, &#60;dog, holding, stick&#62; is a relationship where the 
+                two objects are "dog" and "stick" and they are related to each other by the predicate "holding". The way to explain a 
+                relationship in english is by writing it as "a dog is holding a stick". Similarly, &#60;man, jumping over, fire hydrant&#62;
+                can be read as "A man is jumping over a fire hydrant". It connects the two objects, "man" and "fire hydrant" with the predicate
+                "jumping over".</li>
+            <li>You will be shown a series of relationships in each picture and asked to verify the three questions below:
+                <ul>
+                    <li>Whether the name of object_1 is correct. (For example, if someone marked a "dog" as a "car", tell us that the name is wrong.)</li>
+                    <li>Whether the name of object_2 is correct. (For example, if someone marked a "stick" as a "pole", tell us that the name is wrong.)</li>
+                    <li>Whether the name of predicate is correct. (For example, if someone marked a "holding" as a "throwing", tell us that the name is wrong.)</li>
+                </ul>
+            </li>
+            <li>For this task, we don't care if the boxes are not tightly drawn around the objects. So don't worry about how well the boxes are drawn.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class='container tasks-container'>
+  <div class='container'>
+    <h2>Here are the relationships and pictures we would like you to verify:</h2>
+  </div>
+
+  <div class='container-fluid'>
+    <div class='row'>
+      <div class='col-12'>
+        <div id='image-container'>
+        </div>
+      </div>
+    </div>
+    <br />
+    <br />
+    <div class='row justify-content-center'>
+      <div class='col-6'>
+        <h3>Answer the three questions below.</h3>
+        <h2>The relationship is <span id='rel-name'></span></h2>
+        <div class='row' style='justify-content-center' style='margin-top: 10px; padding-bottom: 10px;'>
+            <div class='col-4'>
+                <button id='wrong-subject-btn' class='btn btn-lg btn-secondary'>Wrong object_1</button>
+            </div>
+            <div class='col-4'>
+            </div>
+            <div class='col-4'>
+                <button id='correct-subject-btn' class='btn btn-lg btn-secondary'>Correct object_1</button>
+            </div>
+        </div>
+        <div class='row' style='justify-content-center' style='margin-top: 10px; padding-bottom: 10px;'>
+            <div class='col-4'>
+                <button id='wrong-object-btn' class='btn btn-lg btn-secondary'>Wrong object_2</button>
+            </div>
+            <div class='col-4'>
+            </div>
+            <div class='col-4'>
+                <button id='correct-object-btn' class='btn btn-lg btn-secondary'>Correct object_2</button>
+            </div>
+        </div>
+        <div class='row' style='justify-content-center' style='margin-top: 10px; padding-bottom: 10px;'>
+            <div class='col-4'>
+                <button id='wrong-predicate-btn' class='btn btn-lg btn-secondary'>Wrong predicate</button>
+            </div>
+            <div class='col-4'>
+            </div>
+            <div class='col-4'>
+                <button id='correct-predicate-btn' class='btn btn-lg btn-secondary'>Correct predicate</button>
+            </div>
+        </div>
+      </div>
+    </div>
+    <div class='row justify-content-center' style='margin-top: 10px; padding-bottom: 10px;'>
+      <div class='col-2'>
+        <button id='prev-btn' class='btn btn-lg btn-primary' disabled>Back</button>
+      </div>
+      <div class='col-2'>
+        <span id='counter'>
+          <span class='counter-top'></span> / <span class='counter-bottom'></span>
+        </span>
+      </div>
+      <div class='col-2'>
+        <button id='next-btn' class='btn btn-lg btn-primary' disabled>Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--IMPORTANT: This import contains all the functions you need to read in your input data and send back worker outputs.-->  
+{% include "easyturk.html" %}
+<script>
+    {% include "javascript/bbox-drawer.js" %}
+</script>
+
+<script>
+    // Define some default input.
+    // It is good practice to define standard inputs for a task which will be overwritten when launching
+    // your actual task. The default inputs allow you to render and debug your task locally.
+    var DEFAULT_INPUT = [{"url": "https://cs.stanford.edu/people/rak248/VG_100K/1160052.jpg",
+                          "predicate": "predicate1",
+                          "subject": {
+                              "x": 20, "y": 10, "w": 100, "h": 200, "name": "object_1",
+                          },
+                          "object": {
+                              "x": 40, "y": 20, "w": 100, "h": 200, "name": "object_2",
+                          },
+                         },
+                         {"url": "https://cs.stanford.edu/people/rak248/VG_100K/1160053.jpg",
+                          "predicate": "predicate2",
+                          "subject": {
+                              "x": 30, "y": 20, "w": 100, "h": 200, "name": "object_1",
+                          },
+                          "object": {
+                              "x": 50, "y": 30, "w": 100, "h": 200, "name": "object_2",
+                          }
+                         }]
+
+    var input = null;
+
+    // This is where we will be collecting the verifications for each image;
+    var options = [];
+
+    // Some variables to track state of the HIT.
+    var idx = 0;
+    var enabled = false;
+    var bb = null; // Bounding box drawing object.
+
+    function main() {
+      // If this is a HIT on AMT, then replace the default input with the real
+      // input.
+      input = easyturk.getInput(DEFAULT_INPUT);
+
+      // Enable the task.
+      if (!easyturk.isPreview()){
+          enableTask();
+      }
+
+      // Set up the correct.
+      _.each(input, function() { 
+          options.push({
+              'subject': null,
+              'predicate': null,
+              'object': null
+          });
+      });
+
+      // Preload all images
+      _.each(input, function(input_elem) {
+        var imgUrl = input_elem['url'];
+        var img = new Image();
+        img.onload = function() { console.log('loaded image from ' + imgUrl); };
+        img.src = imgUrl;
+      });
+
+      // Add in static box colors.
+      _.each(input, function(input_elem) {
+          input_elem.subject.color = '#f00';
+          input_elem.object.color = '#0f0';
+      });
+
+      // Activate verification buttons.
+      for (var key in options[idx]) {
+          $('#correct-' + key + '-btn').click(function(key) {
+              return function() {
+                  saveOption(key, true);
+              };
+          }(key));
+          $('#wrong-' + key + '-btn').click(function(key) {
+              return function() {
+                  saveOption(key, false);
+              }
+          }(key));
+      }
+
+
+      render();
+    }
+
+    // Use the current index to update the image and description
+    function render() {
+        // Draw the bounding box.
+        if (bb != null) {
+            bb.disable();
+            bb.remove();
+        }
+        $('#image-container').empty();
+        bb = new ETJS.BBoxDrawer($('#image-container'), input[idx]['url'], 1000);
+        bb.reset();
+        bb.addStaticBox(input[idx].subject);
+        bb.addStaticBox(input[idx].object);
+
+        // Set up the input text field
+        $('#rel-name').html(
+                '&#60;<span style=\'color:#f00\'>' +
+                input[idx].subject.name +
+                '</span>, ' + input[idx].predicate +
+                ', <span style=\'color:#0a0\'>' +
+                input[idx].object.name + '</span>&#62;');
+  
+        // Refresh the counter
+        $('.counter-top').text(idx + 1);
+        $('.counter-bottom').text(input.length);
+
+        // Setup the choice that the user already made.
+        render_verification_buttons();
+
+        // If the UI is enabled, enable or disable the buttons depending on
+        // the index.
+        if (enabled) {
+            $('#prev-btn').prop('disabled', false);
+            $('#next-btn').prop('disabled', false);
+            if (idx == 0) {
+                $('#prev-btn').prop('disabled', true);
+            }
+            if (idx == input.length - 1) {
+                $('#next-btn').prop('disabled', true);
+            }
+        }
+    }
+
+    function _helper_color_buttons(option, success_id, danger_id) {
+        if (option) {
+            $(success_id).removeClass('btn-secondary').addClass('btn-success');
+            $(danger_id).removeClass('btn-danger').addClass('btn-secondary');
+        } else {
+            $(success_id).removeClass('btn-success').addClass('btn-secondary');
+            $(danger_id).removeClass('btn-secondary').addClass('btn-danger');
+        }
+    }
+
+    function _helper_default_buttons(button_id) {
+        $(button_id).removeClass('btn-danger')
+                    .removeClass('btn-success')
+                    .addClass('btn-secondary');
+    }
+
+    // Render the colors of the buttons to show that user the choice they made.
+    function render_verification_buttons() {
+        for (var key in options[idx]) {
+            if (options[idx][key] != null) {
+                _helper_color_buttons(options[idx][key], '#correct-' + key + '-btn', '#wrong-' + key + '-btn');
+            } else {
+                _helper_default_buttons('#correct-' + key + '-btn');
+                _helper_default_buttons('#wrong-' + key + '-btn');
+            }
+        }
+    }
+
+    // Update the index, and save the text in the text area.
+    function setIdx(newIdx) {
+        if (newIdx < 0 || newIdx >= input.length) return;
+        idx = newIdx;
+        render();
+    }
+
+    function saveOption(key, correct) {
+        options[idx][key] = correct;
+        render_verification_buttons();
+    }
+
+    // Enable the UI.
+    function enableTask() {
+        enabled = true;
+        easyturk.setupSubmit();
+
+        // Enable components
+        $('#next-btn').click(function() {
+            setIdx(idx + 1);
+        });
+        $('#prev-btn').click(function() {
+            setIdx(idx - 1);
+        });
+        $('#submit-btn').prop('disabled', false);
+
+        $('#submit-btn').click(function() {
+            // Make sure to save the last one.
+            for (var i = 0; i < input.length; i++) {
+                for (var key in options[i]) {
+                    if (options[i][key] == null) {
+                        alert('You did not verify image #' + (i+1));
+                        return false;
+                    }  
+                }
+            }
+
+            // Copy the options to the output we will return to the requester.
+            var output = input;
+            for (var i = 0; i < output.length; i++) {
+                output[i].option = {}
+                for (var key in options[i]) {
+                    output[i].option[key] = options[i][key];
+                }
+            }
+            if (easyturk.isPreview()) {
+                alert("This is only a preview. Here is your output: \n" + JSON.stringify(output));
+                return false;
+            } else {
+                easyturk.setOutput(output);
+                return true;
+            }
+      });
+    }
+
+    main();
+</script>
+</body>
+</html>
