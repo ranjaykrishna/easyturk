@@ -67,9 +67,11 @@ This should print out how much balance you have left in your account. If you do 
 
 #### Example tasks that you can use out of the box:
 
-1. Image captioning: `easyturk/templates/write_caption.html' contains a image captioning task where workers are asked to write captions for each image.
-2. Verification: `easyturk/templates/verify_caption.html' contains a verification task that asks users to verify that a certain caption is correct for a given image.
-3. Bounding Box: `easyturk/templates/annotate_bbox.html' contains a bounding box task that asks users to annotate multiple objects per image.
+1. Image captioning: `easyturk/templates/write_caption.html` contains a image captioning task where workers are asked to write captions for each image.
+2. Verification: `easyturk/templates/verify_caption.html` contains a verification task that asks users to verify that a certain caption is correct for a given image.
+3. Bounding box: `easyturk/templates/annotate_bbox.html` contains a bounding box task that asks users to annotate multiple objects per image.
+3. Verify bounding box: `easyturk/templates/verify_bbox.html` contains a bounding box task that asks users verify whether a bounding box has been annotated correctly.
+4. Verify visual relationships: `easyturk/templates/verify_relationship.html` contains a task that asks users to verify whether a visual relationship has been annotated correctly.
 
 In the remainer of this tutorial, we will explain how you can launch the captioning task and how you can create your own tasks. The same workflow can be used for the other tasks as well.
 
