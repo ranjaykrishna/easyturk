@@ -165,6 +165,9 @@ var ETJS = (function(etjs) {
             static_box.y = box.y;
             static_box.w = box.w;
             static_box.h = box.h;
+            if (box.color != null) {
+                static_box.color = box.color;
+            }
             //scale = choose_scale(img);
             if (scale) {
                 static_box.x = toCanvasCoords(box.x);
@@ -495,7 +498,11 @@ var ETJS = (function(etjs) {
 
       for (var k = 0; k < static_boxes.length; k++) {
           static_box = static_boxes[k];
-          drawBox(static_box, options.static_box_color);
+          box_color = options.static_box_color;
+          if (static_box.color != null) {
+              box_color = static_box.color;
+          }
+          drawBox(static_box, box_color);
       }
 
       if (object_name && object_pos) {
