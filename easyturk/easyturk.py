@@ -279,9 +279,11 @@ class EasyTurk(object):
         output = {}
         for hit_id in hit_ids:
             hit = self.mtc.get_hit(HITId=hit_id)
-            left = hit['HIT']['NumberOfAssignmentsAvailable']
+            assignments = self.mtc.list_assignments_for_hit(
+                    HITId=hit_id, AssignmentStatuses=['Submitted'])
+            completed = len(assignments['Assignments'])
             max_assignments = hit['HIT']['MaxAssignments']
-            output[hit_id] = {'completed': max_assignments-left,
+            output[hit_id] = {'completed': completed,
                               'max_assignments': max_assignments}
         return output
 
