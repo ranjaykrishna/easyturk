@@ -1,0 +1,72 @@
+{% extends "evaluation/easyturk.html" %}
+{% block content %}
+<style>
+    button {
+        margin: 10px;
+    }
+    div {
+        padding: 5px;
+    }
+</style>
+<div class='container-fluid'>
+    <h4>You are currently viewing <span id='assignment-id' style='color: red'></span> from worker <span id='worker-id' style='color: red'></span></h4>
+    <div id='images'></div>
+</div>
+
+<!--IMPORTANT: This import contains all the functions you need to read in your input data and send back worker outputs.-->  
+<script>
+    {% include "javascript/bbox-drawer.js" %}
+</script>
+
+<script>
+    function renderAssignment(hit) {
+        $('#images').empty();
+        for (var i = 0; i < hit.output.length; i++) {
+            renderImage(hit.output[i]);
+        }
+        $('#assignment-id').text(hit.assignment_id);
+        $('#hit-id').text(hit.hit_id);
+        $('#worker-id').text(hit.worker_id);
+    }
+
+    function renderImage(image) {
+        var row = $("<div class='row'>");
+        $('#images').append(row);
+        var image_div = $("<div class='col-6'>");
+        row.append(image_div);
+        var image_container = $("<div>");
+        image_div.append(image_container);
+        var button_div = $("<div class='col-4'>");
+        row.append(button_div);
+        var rel_name = $("<p>");
+        button_div.append(rel_name);
+
+        bb = new ETJS.BBoxDrawer(image_container, image.url, 500);
+        bb.reset();
+        image.subject.color = '#f00';
+        image.object.color = '#0f0';
+        bb.addStaticBox(image.subject);
+        bb.addStaticBox(image.object);
+
+        // Set up the input text field
+        rel_name.html(
+            '&#60;<span style=\'color:#f00\'>' +
+            image.subject.name +
+            '</span>, ' + image.predicate +
+            ', <span style=\'color:#0a0\'>' +
+            image.object.name + '</span>&#62;');
+  
+        for (var key in image.option) {
+            var btn_class = 'btn btn-large';
+            if (image.option[key]) {
+                btn_class = btn_class + ' btn-success';
+            } else {
+                btn_class = btn_class + ' btn-danger';
+            }
+            var btn = $("<button class='" + btn_class + "' disabled>");
+            btn.text(key);
+            button_div.append(btn);
+        }
+    }
+</script>
+{% endblock %}
