@@ -237,6 +237,23 @@ class EasyTurk(object):
                 AssignmentId=assignment_id, RequesterFeedback='Invalid results')
         return approve_ids, reject_ids
 
+    def reject_assignment(self, assignment_id):
+        """Reject an assignment so that the worker can get paid.
+
+        Args:
+            assignment_id: An assignment id.
+
+        Returns:
+            A boolean indicating success.
+        """
+        a = self.mtc.get_assignment(AssignmentId=assignment_id)['Assignment']
+        if a['AssignmentStatus'] == 'Submitted':
+            self.mtc.reject_assignment(
+                AssignmentId=assignment_id,
+                RequesterFeedback='Invalid results')
+            return True
+        return False
+
     def approve_assignment(self, assignment_id, reject_on_fail=False,
                            override_rejection=False):
         """Approves an assignment so that the worker can get paid.
