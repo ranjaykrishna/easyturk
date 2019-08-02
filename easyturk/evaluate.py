@@ -91,7 +91,7 @@ def task():
 def interface():
     """Endpoint that rejects and approves work.
     """
-    et = EasyTurk()
+    et = EasyTurk(sandbox=False)
     if request.method != 'POST':
         return 'Fail'
     assignment_ids = json.loads(request.form['assignment_ids'])

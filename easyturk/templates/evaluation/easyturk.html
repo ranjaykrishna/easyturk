@@ -60,13 +60,13 @@
     </div>
     <div class='row'>
         <div class='col-3' align='center'>
-            <button id='prev-worker-btn' class='btn btn-lg btn-primary'>Previous worker</button>
-        </div>
-        <div class='col-3' align='center'>
             <button id='prev-assignment-btn' class='btn btn-lg btn-primary'>Previous assignment</button>
         </div>
         <div class='col-3' align='center'>
             <button id='next-assignment-btn' class='btn btn-lg btn-primary'>Next assignment</button>
+        </div>
+        <div class='col-3' align='center'>
+            <button id='prev-worker-btn' class='btn btn-lg btn-primary'>Previous worker</button>
         </div>
         <div class='col-3' align='center'>
             <button id='next-worker-btn' class='btn btn-lg btn-primary'>Next worker</button>
@@ -125,7 +125,7 @@
               }
           }
       }
-      render(results.hits[idx]);
+      render();
   }
 
   function previousAssignment() {
@@ -138,7 +138,7 @@
               }
           }
       }
-      render(results.hits[idx]);
+      render();
   }
 
   function nextWorker() {
@@ -146,7 +146,7 @@
           w_idx++;
           idx = results.workers[results.worker_ids[w_idx]][0];
       }
-      render(results.hits[idx]);
+      render();
   }
 
   function previousWorker() {
@@ -154,7 +154,7 @@
           w_idx--;
           idx = results.workers[results.worker_ids[w_idx]][0];
       }
-      render(results.hits[idx]);
+      render();
   }
 
   function send_request(data) {
@@ -176,6 +176,7 @@
               'approve': false}
       send_request(data);
       results.hits[idx].approve = false;
+      render();
   }
 
   function approveAssignment() {
@@ -186,6 +187,7 @@
               'approve': true}
       send_request(data);
       results.hits[idx].approve = true;
+      render();
   }
 
   function rejectWorker() {
@@ -203,6 +205,7 @@
       data = {'assignment_ids': assignment_ids,
               'approve': false}
       send_request(data);
+      render();
   }
 
   function approveWorker() {
@@ -219,6 +222,8 @@
       }
       data = {'assignment_ids': assignment_ids,
               'approve': true}
+      send_request(data);
+      render();
   }
 
   function render() {
@@ -232,7 +237,11 @@
       $('#assignment-id').text(results.hits[idx].assignment_id);
       $('#hit-id').text(results.hits[idx].hit_id);
       $('#worker-id').text(results.hits[idx].worker_id);
-      $('#approve').text(results.hits[idx].approve);
+      if ('approve' in results.hits[idx]) {
+          $('#approve').text(results.hits[idx].approve);
+      } else {
+          $('#approve').text('N/A');
+      }
       renderAssignment(results.hits[idx]);
   }
 
