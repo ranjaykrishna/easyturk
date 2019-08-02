@@ -8,6 +8,9 @@ from flask import request
 import json
 import os
 
+from easyturk import EasyTurk
+
+
 # Global server variables.
 app = Flask(__name__)
 
@@ -65,6 +68,8 @@ def convert(results):
 
 @app.route('/task')
 def task():
+    """Visualizes the results received for a given task.
+    """
     # Compile the template.
     task = request.args['task']
     results_file = request.args['results']
@@ -77,7 +82,32 @@ def task():
         json.dump(results, open(eresults_file, 'w'))
     return render_template(
             'evaluation/' + task,
-            results=results)
+            results=results,
+            task=results_file,
+            eresults_file=eresults_file)
+
+
+@app.route('/interface', methods=['POST'])
+def interface():
+    """Endpoint that rejects and approves work.
+    """
+    et = EasyTurk()
+    if request.method != 'POST':
+        return 'Fail'
+    assignment_ids = json.loads(request.form['assignment_ids'])
+    approve = json.loads(request.form['approve'])
+    for assignment_id in assignment_ids:
+        if approve:
+            et.approve_assignment(assignment_id)
+        else:
+            et.reject_assignment(assignment_id)
+    eresults_file = request.form['eresults_file']
+    results = json.load(open(eresults_file))
+    for hit in results['hits']:
+        if hit['assignment_id'] in assignment_ids:
+            hit['approve'] = approve
+    json.dump(results, open(eresults_file, 'w'))
+    return 'Succcess'
 
 
 @app.route('/')

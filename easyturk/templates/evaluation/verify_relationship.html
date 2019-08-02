@@ -9,7 +9,6 @@
     }
 </style>
 <div class='container-fluid'>
-    <h4>You are currently viewing <span id='assignment-id' style='color: red'></span> from worker <span id='worker-id' style='color: red'></span></h4>
     <div id='images'></div>
 </div>
 
@@ -24,9 +23,6 @@
         for (var i = 0; i < hit.output.length; i++) {
             renderImage(hit.output[i]);
         }
-        $('#assignment-id').text(hit.assignment_id);
-        $('#hit-id').text(hit.hit_id);
-        $('#worker-id').text(hit.worker_id);
     }
 
     function renderImage(image) {
@@ -56,7 +52,9 @@
             ', <span style=\'color:#0a0\'>' +
             image.object.name + '</span>&#62;');
   
-        for (var key in image.option) {
+        var elems = ['subject', 'predicate', 'object'];
+        for (var i in elems) {
+            var key = elems[i]
             var btn_class = 'btn btn-large';
             if (image.option[key]) {
                 btn_class = btn_class + ' btn-success';
