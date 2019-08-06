@@ -117,9 +117,9 @@
   }
 
   function nextAssignment() {
-      if (idx < results.hits.length) {
+      if (idx < results.hits.length - 1) {
           idx++;
-          if (w_idx < results.worker_ids.length) {
+          if (w_idx < results.worker_ids.length - 1) {
               if (results.workers[results.worker_ids[w_idx + 1]][0] <= idx) {
                   w_idx++;
               }
@@ -142,7 +142,7 @@
   }
 
   function nextWorker() {
-      if (w_idx < results.worker_ids.length) {
+      if (w_idx < results.worker_ids.length - 1) {
           w_idx++;
           idx = results.workers[results.worker_ids[w_idx]][0];
       }
@@ -232,8 +232,8 @@
       }
       $('#num-workers').text(results.worker_ids.length);
       $('#num-assignments').text(results.hits.length);
-      $('#w-idx').text(w_idx);
-      $('#idx').text(idx);
+      $('#w-idx').text(w_idx + 1);
+      $('#idx').text(idx + 1);
       $('#assignment-id').text(results.hits[idx].assignment_id);
       $('#hit-id').text(results.hits[idx].hit_id);
       $('#worker-id').text(results.hits[idx].worker_id);
