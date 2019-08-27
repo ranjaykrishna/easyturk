@@ -89,12 +89,12 @@
         <p id='caption'></p>
         <div class='row' style='justify-content-center' style='margin-top: 10px; padding-bottom: 10px;'>
             <div class='col-4'>
-                <button id='wrong-btn' class='btn btn-lg btn-default'>Wrong</button>
+                <button id='wrong-btn' class='btn btn-lg btn-primary'>Wrong</button>
             </div>
             <div class='col-4'>
             </div>
             <div class='col-4'>
-                <button id='correct-btn' class='btn btn-lg btn-default'>Correct</button>
+                <button id='correct-btn' class='btn btn-lg btn-primary'>Correct</button>
             </div>
         </div>
       </div>
@@ -195,19 +195,19 @@
     function render_verification_buttons(){
         if (options[idx] != null) {
             if (options[idx]) {
-                $('#correct-btn').removeClass('btn-default').addClass('btn-success');
-                $('#wrong-btn').removeClass('btn-danger').addClass('btn-default');
+                $('#correct-btn').removeClass('btn-primary').addClass('btn-success');
+                $('#wrong-btn').removeClass('btn-danger').addClass('btn-primary');
             } else {
-                $('#correct-btn').removeClass('btn-success').addClass('btn-default');
-                $('#wrong-btn').removeClass('btn-default').addClass('btn-danger');
+                $('#correct-btn').removeClass('btn-success').addClass('btn-primary');
+                $('#wrong-btn').removeClass('btn-primary').addClass('btn-danger');
             }
         } else {
             if (options[idx]) {
-                $('#correct-btn').removeClass('btn-success').addClass('btn-default');
-                $('#wrong-btn').removeClass('btn-danger').addClass('btn-default');
+                $('#correct-btn').removeClass('btn-success').addClass('btn-primary');
+                $('#wrong-btn').removeClass('btn-danger').addClass('btn-primary');
             } else {
-                $('#correct-btn').removeClass('btn-success').addClass('btn-default');
-                $('#wrong-btn').removeClass('btn-danger').addClass('btn-default');
+                $('#correct-btn').removeClass('btn-success').addClass('btn-primary');
+                $('#wrong-btn').removeClass('btn-danger').addClass('btn-primary');
             }
         }
     }
