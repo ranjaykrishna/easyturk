@@ -1,6 +1,6 @@
 <html>
 <head>
-  <title>Verify whether captions for pictures are accurate</title>
+  <title>Verify whether the answers to questions about a pictures are accurate</title>
   <!-- easyturk depends on these libraries -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
@@ -60,8 +60,8 @@
       <div class='row'>
         <div class='col-md-12'>
           <ul>
-            <li>Verify whether captions for pictures are accurate.</li>
-            <li>In this task, you will be shown a picture and a caption your task is to say whether the caption is a correct way to describe the image.</li>
+            <li>Verify whether answers to questions about pictures are accurate.</li>
+            <li>In this task, you will be shown a picture and a questions and answer. Your task is to say whether the answer is correct.</li>
           </ul>
         </div>
       </div>
@@ -71,7 +71,7 @@
 
 <div class='container tasks-container'>
   <div class='container'>
-    <h2>Here are the captions and pictures we would like you to verify:</h2>
+    <h2>Here are the answers with questions and pictures we would like you to verify:</h2>
   </div>
 
   <div class='container-fluid'>
@@ -85,8 +85,9 @@
     <br />
     <div class='row justify-content-center'>
       <div class='col-6'>
-        <h2>Verify a caption describing the contents of the image:</h2>
-        <p id='caption'></p>
+        <h3>Verify the answer for the question about the contents of the image:</h3>
+        <h2 style='color: blue;' id='question'></h2>
+        <h2 style='color: red;' id='answer'></h2>
         <div class='row' style='justify-content-center' style='margin-top: 10px; padding-bottom: 10px;'>
             <div class='col-4'>
                 <button id='wrong-btn' class='btn btn-lg btn-default'>Wrong</button>
@@ -123,9 +124,11 @@
     // It is good practice to define standard inputs for a task which will be overwritten when launching
     // your actual task. The default inputs allow you to render and debug your task locally.
     var DEFAULT_INPUT = [{"url": "https://cs.stanford.edu/people/rak248/VG_100K/1160052.jpg",
-                          "caption": "This is an example caption 1"},
+                          "question": "This is an example question 1",
+                          "answer": "Answer 1"},
                          {"url": "https://cs.stanford.edu/people/rak248/VG_100K/1160053.jpg",
-                          "caption": "This is a sample caption 2."}]
+                          "question": "This is a sample question 2.",
+                          "answer": "Answer 2"}]
 
     var input = null;
 
@@ -167,8 +170,8 @@
         $('#image-container').empty();
         $("<img style='width:100%; height:auto;'>").attr('src', input[idx]['url']).appendTo($('#image-container'));
 
-        // Set up the input text field
-        $('#caption').text(options[idx]);
+        $('#question').text('Q: ' + input[idx].question);
+        $('#answer').text('A: ' + input[idx].answer);
   
         // Refresh the counter
         $('.counter-top').text(idx + 1);
