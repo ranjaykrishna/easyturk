@@ -4,6 +4,34 @@
 from easyturk import EasyTurk
 
 
+def launch_verify_question_answer(data, reward=1.00, tasks_per_hit=50, sandbox=False):
+    """Launches HITs to ask workers to verify bounding boxes.
+
+    Args:
+        data: List containing image urls, questions and answers, for the task.
+        reward: A postive valued dollar amount per task.
+        tasks_per_hit: Number of images per hit.
+        sandbox: Whether to interact on sandbox or production.
+
+    Returns:
+        A list of hit ids that have been launched.
+    """
+    et = EasyTurk(sandbox=sandbox)
+    template = 'verify_question_answer.html'
+    hit_ids = []
+    i = 0
+    while i < len(data):
+        hit = et.launch_hit(
+            template, data[i:i+tasks_per_hit], reward=reward,
+            title='Verify the answer to a question about an picture',
+            description=('Verify whether an answer to a question about a picture is correct.'),
+            keywords='image, text, picture, answer, question, relationship')
+        hit_id = hit['HIT']['HITId']
+        hit_ids.append(hit_id)
+        i += tasks_per_hit
+    return hit_ids
+
+
 def launch_verify_relationship(data, reward=1.00, tasks_per_hit=30, sandbox=False):
     """Launches HITs to ask workers to verify bounding boxes.
 
