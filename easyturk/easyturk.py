@@ -153,13 +153,19 @@ class EasyTurk(object):
             The number of dictionaries is equal to the number of assignments.
         """
         status = ['Approved', 'Submitted', 'Rejected']
+        assignments = []
         try:
-            assignments = self.mtc.list_assignments_for_hit(
+            tmp = self.mtc.list_assignments_for_hit(
                     HITId=hit_id, AssignmentStatuses=status)
+            assignments.extend(tmp['Assignments'])
+            while "NextToken" in tmp:
+                tmp = self.mtc.list_assignments_for_hit(NextToken=tmp["NextToken"],
+                    HITId=hit_id, AssignmentStatuses=status)
+                assignments.extend(tmp['Assignments'])
         except Exception:
             return []
         results = []
-        for a in assignments['Assignments']:
+        for a in assignments:
             output = self._parse_response_from_assignment(a)
             if output is not None:
                 results.append({
@@ -174,6 +180,7 @@ class EasyTurk(object):
                     AssignmentId=a['AssignmentId'],
                     RequesterFeedback='Invalid results')
         return results
+
 
     def delete_hit(self, hit_id):
         """Disables a hit.
@@ -310,5 +317,11 @@ class EasyTurk(object):
         Returns:
             A list of HITs.
         """
-        hits = self.mtc.list_hits()['HITs']
+        hits = []
+        curr_hits = self.mtc.list_hits()
+        hits.extend(curr_hits["HITs"])
+        while "NextToken" in curr_hits:
+            curr_hits = self.mtc.list_hits( NextToken=curr_hits["NextToken"])
+            hits.extend(curr_hits["HITs"])
+
         return hits
