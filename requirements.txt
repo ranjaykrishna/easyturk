@@ -10,7 +10,7 @@ MarkupSafe==1.1.1
 pyasn1==0.4.5
 python-dateutil==2.8.0
 PyYAML==5.1
-rsa==3.4.2
+rsa==4.1
 s3transfer==0.2.1
 six==1.12.0
 urllib3==1.25.3
