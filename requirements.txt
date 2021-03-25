@@ -9,7 +9,7 @@ jmespath==0.9.4
 MarkupSafe==1.1.1
 pyasn1==0.4.5
 python-dateutil==2.8.0
-PyYAML==5.1
+PyYAML==5.4
 rsa==3.4.2
 s3transfer==0.2.1
 six==1.12.0
